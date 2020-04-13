@@ -67,8 +67,6 @@ public class GithubCommitSource extends GithubSource<Commit> implements ListChec
                   .timestamp(lastCommitDate)
                   .build();
 
-          // TODO consider materializing and sorting for less out-of-orderness
-
           ctx.collectWithTimestamp(commit, lastCommitDate.getTime());
         }
 
