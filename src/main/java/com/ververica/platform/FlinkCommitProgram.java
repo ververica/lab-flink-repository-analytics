@@ -42,12 +42,15 @@ public class FlinkCommitProgram {
     int esPort = params.getInt("es-port", 9200);
 
     // Source
-    long delayBetweenQueries = params.getLong("poll-interval", 1000L);
+    long delayBetweenQueries = params.getLong("poll-interval-ms", 1000L);
     String startDateString = params.get("start-date", "");
+
+    // General
+    long checkpointInterval = params.getLong("checkpointing-interval-ms", 10_000L);
 
     StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-    env.enableCheckpointing(10_000);
+    env.enableCheckpointing(checkpointInterval);
     env.getCheckpointConfig()
         .enableExternalizedCheckpoints(
             CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
