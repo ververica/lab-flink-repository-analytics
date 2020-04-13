@@ -3,8 +3,6 @@ name: Publish
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:
@@ -22,3 +20,9 @@ jobs:
         run: mvn verify --file pom.xml
       - name: Build
         run: mvn package --file pom.xml
+      - name: Publish to GitHub Packages Apache Maven
+        run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        if:
+          success()
