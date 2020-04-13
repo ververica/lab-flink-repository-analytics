@@ -70,7 +70,6 @@ public class FlinkCommitProgram {
             .uid("component-activity-window");
 
     componentCounts.addSink(getElasticsearchSink(esHost, esPort));
-    componentCounts.printToErr();
 
     env.execute("Apache Flink Project Dashboard");
   }
