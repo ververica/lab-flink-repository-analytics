@@ -120,7 +120,7 @@ public class FlinkCommitProgram {
 
                 UpdateRequest upsertComponentUpdateSummary =
                     new UpdateRequest(
-                        "github_stats-2019",
+                        "github_stats",
                         String.valueOf(
                             Objects.hash(element.getComponentName(), element.getWindowStart())));
                 upsertComponentUpdateSummary.doc(source).upsert(source);
