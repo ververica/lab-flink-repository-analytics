@@ -42,7 +42,7 @@ public class GithubCommitSource extends GithubSource<Commit> implements ListChec
   public void run(SourceContext<Commit> ctx) throws IOException {
     while (running) {
       Instant until = getUntilFor(lastTime);
-      LOG.info("Fetching commits since {} until {}", lastTime, until);
+      LOG.debug("Fetching commits since {} until {}", lastTime, until);
       PagedIterable<GHCommit> commits =
           repo.queryCommits().since(Date.from(lastTime)).until(Date.from(until)).list();
       Date lastCommitDate;
