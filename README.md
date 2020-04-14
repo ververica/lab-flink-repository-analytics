@@ -5,7 +5,7 @@
 This Apache Flink application analyzes the commit history of the Apache Flink Open Source project. 
 It pulls data form the Github API via a custom Flink Source and writes it to ElasticSearch.
 
-It is the running example fo a blog post series on Ververica Platform Community Edition.  
+It is the running example for a blog post series on Ververica Platform Community Edition.  
 
 The entrypoint class is `com.ververica.platform.FlinkCommitProgram`.
 
