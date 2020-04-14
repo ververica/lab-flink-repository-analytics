@@ -42,12 +42,15 @@ public class FlinkCommitProgram {
     int esPort = params.getInt("es-port", 9200);
 
     // Source
-    long delayBetweenQueries = params.getLong("poll-interval", 1000L);
+    long delayBetweenQueries = params.getLong("poll-interval-ms", 1000L);
     String startDateString = params.get("start-date", "");
+
+    // General
+    long checkpointInterval = params.getLong("checkpointing-interval-ms", 10_000L);
 
     StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-    env.enableCheckpointing(10_000);
+    env.enableCheckpointing(checkpointInterval);
     env.getCheckpointConfig()
         .enableExternalizedCheckpoints(
             CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
@@ -70,7 +73,6 @@ public class FlinkCommitProgram {
             .uid("component-activity-window");
 
     componentCounts.addSink(getElasticsearchSink(esHost, esPort));
-    componentCounts.printToErr();
 
     env.execute("Apache Flink Project Dashboard");
   }
@@ -120,7 +122,7 @@ public class FlinkCommitProgram {
 
                 UpdateRequest upsertComponentUpdateSummary =
                     new UpdateRequest(
-                        "github_stats-2019",
+                        "github_stats",
                         String.valueOf(
                             Objects.hash(element.getComponentName(), element.getWindowStart())));
                 upsertComponentUpdateSummary.doc(source).upsert(source);
