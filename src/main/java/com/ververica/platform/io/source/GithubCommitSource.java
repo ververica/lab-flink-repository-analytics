@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.apache.flink.streaming.api.checkpoint.ListCheckpointed;
 import org.apache.flink.streaming.api.watermark.Watermark;
 import org.kohsuke.github.GHCommit;
@@ -45,39 +46,49 @@ public class GithubCommitSource extends GithubSource<Commit> implements ListChec
       LOG.debug("Fetching commits since {} until {}", lastTime, until);
       PagedIterable<GHCommit> commits =
           repo.queryCommits().since(Date.from(lastTime)).until(Date.from(until)).list();
-      Date lastCommitDate;
+
+      List<Commit> changes =
+          StreamSupport.stream(commits.withPageSize(PAGE_SIZE).spliterator(), false)
+              .map(this::fromGHCommit)
+              .collect(Collectors.toList());
 
       synchronized (ctx.getCheckpointLock()) {
-        for (GHCommit ghCommit : commits.withPageSize(PAGE_SIZE)) {
-          lastCommitDate = ghCommit.getCommitDate();
-
-          GHUser author = ghCommit.getAuthor();
-          Commit commit =
-              Commit.builder()
-                  .author(author != null ? author.getName() : "unknown")
-                  .filesChanged(
-                      ghCommit.getFiles().stream()
-                          .map(
-                              file ->
-                                  FileChanged.builder()
-                                      .filename(file.getFileName())
-                                      .linesChanged(file.getLinesChanged())
-                                      .build())
-                          .collect(Collectors.toList()))
-                  .timestamp(lastCommitDate)
-                  .build();
-
-          ctx.collectWithTimestamp(commit, lastCommitDate.getTime());
+        for (Commit commit : changes) {
+          ctx.collectWithTimestamp(commit, commit.getTimestamp().getTime());
         }
 
         lastTime = until;
         ctx.emitWatermark(new Watermark(lastTime.toEpochMilli()));
       }
+
       try {
         Thread.sleep(pollIntervalMillis);
       } catch (InterruptedException e) {
         running = false;
       }
+    }
+  }
+
+  private Commit fromGHCommit(GHCommit ghCommit) {
+    try {
+      Date lastCommitDate = ghCommit.getCommitDate();
+      GHUser author = ghCommit.getAuthor();
+
+      return Commit.builder()
+          .author(author != null ? author.getName() : "unknown")
+          .filesChanged(
+              ghCommit.getFiles().stream()
+                  .map(
+                      file ->
+                          FileChanged.builder()
+                              .filename(file.getFileName())
+                              .linesChanged(file.getLinesChanged())
+                              .build())
+                  .collect(Collectors.toList()))
+          .timestamp(lastCommitDate)
+          .build();
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to pull commit from GH", e);
     }
   }
 
@@ -97,7 +108,6 @@ public class GithubCommitSource extends GithubSource<Commit> implements ListChec
   }
 
   public Instant getUntilFor(Instant since) {
-
     Instant maybeUntil = since.plus(1, ChronoUnit.HOURS);
 
     if (maybeUntil.compareTo(Instant.now()) > 0) {
