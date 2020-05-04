@@ -3,6 +3,7 @@ package com.ververica.platform;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 import com.ververica.platform.entities.Commit;
+import com.ververica.platform.entities.ComponentChanged;
 import com.ververica.platform.entities.ComponentChangedSummary;
 import com.ververica.platform.io.source.GithubCommitSource;
 import com.ververica.platform.operators.ComponentChangedAggeragator;
@@ -12,6 +13,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -66,7 +69,7 @@ public class FlinkCommitProgram {
         commits
             .flatMap(new ComponentExtractor())
             .name("component-extractor")
-            .keyBy(componentChanged -> componentChanged.getName())
+            .keyBy(ComponentChanged::getName)
             .timeWindow(Time.hours(1))
             .aggregate(new ComponentChangedAggeragator(), new ComponentChangedSummarizer())
             .name("component-activity-window")
@@ -84,55 +87,58 @@ public class FlinkCommitProgram {
       githubCommitSource =
           new GithubCommitSource(APACHE_FLINK_REPOSITORY, Instant.now(), delayBetweenQueries);
     } else {
-      Instant startDate = Instant.parse(startDateString);
+      Instant startDate =
+          LocalDate.parse(startDateString).atStartOfDay(ZoneId.of("UTC")).toInstant();
       githubCommitSource =
           new GithubCommitSource(APACHE_FLINK_REPOSITORY, startDate, delayBetweenQueries);
     }
     return githubCommitSource;
   }
 
-  private static ElasticsearchSink getElasticsearchSink(final String host, final int port)
-      throws UnknownHostException {
+  private static ElasticsearchSink<ComponentChangedSummary> getElasticsearchSink(
+      final String host, final int port) throws UnknownHostException {
 
     List<HttpHost> transportAddresses = new ArrayList<>();
     transportAddresses.add(new HttpHost(InetAddress.getByName(host), port));
 
-    ElasticsearchSink.Builder builder =
-        new ElasticsearchSink.Builder(
-            transportAddresses,
-            new ElasticsearchSinkFunction<ComponentChangedSummary>() {
-
-              @Override
-              public void process(
-                  ComponentChangedSummary element, RuntimeContext ctx, RequestIndexer indexer) {
-
-                XContentBuilder source;
-                try {
-                  source =
-                      jsonBuilder()
-                          .startObject()
-                          .field("component", element.getComponentName())
-                          .timeField("windowStart", element.getWindowStart())
-                          .timeField("windowEnd", element.getWindowEnd())
-                          .field("linesChanged", element.getLinesChanged())
-                          .endObject();
-                } catch (IOException e) {
-                  throw new RuntimeException("error serializing component summery", e);
-                }
-
-                UpdateRequest upsertComponentUpdateSummary =
-                    new UpdateRequest(
-                        "github_stats",
-                        String.valueOf(
-                            Objects.hash(element.getComponentName(), element.getWindowStart())));
-                upsertComponentUpdateSummary.doc(source).upsert(source);
-
-                indexer.add(upsertComponentUpdateSummary);
-              }
-            });
+    ElasticsearchSink.Builder<ComponentChangedSummary> builder =
+        new ElasticsearchSink.Builder<>(transportAddresses, new ComponentChangedSinkFunction());
 
     builder.setBulkFlushMaxActions(1);
 
     return builder.build();
+  }
+
+  private static class ComponentChangedSinkFunction
+      implements ElasticsearchSinkFunction<ComponentChangedSummary> {
+
+    private static final long serialVersionUid = 1L;
+
+    @Override
+    public void process(
+        ComponentChangedSummary element, RuntimeContext ctx, RequestIndexer indexer) {
+
+      XContentBuilder source;
+      try {
+        source =
+            jsonBuilder()
+                .startObject()
+                .field("component", element.getComponentName())
+                .timeField("windowStart", element.getWindowStart())
+                .timeField("windowEnd", element.getWindowEnd())
+                .field("linesChanged", element.getLinesChanged())
+                .endObject();
+      } catch (IOException e) {
+        throw new RuntimeException("error serializing component summery", e);
+      }
+
+      UpdateRequest upsertComponentUpdateSummary =
+          new UpdateRequest(
+              "github_stats",
+              String.valueOf(Objects.hash(element.getComponentName(), element.getWindowStart())));
+      upsertComponentUpdateSummary.doc(source).upsert(source);
+
+      indexer.add(upsertComponentUpdateSummary);
+    }
   }
 }
