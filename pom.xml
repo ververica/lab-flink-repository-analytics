@@ -170,28 +170,11 @@
                   </excludes>
                 </filter>
               </filters>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.4</version>
-        <executions>
-          <execution>
-            <id>TopSpeedWindowing</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classifier>FlinkCommitProgram</classifier>
-              <archive>
-                <manifestEntries>
-                  <program-class>com.ververica.platform.FlinkCommitProgram</program-class>
-                </manifestEntries>
-              </archive>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>com.ververica.platform.FlinkCommitProgram</mainClass>
+                </transformer>
+              </transformers>
             </configuration>
           </execution>
         </executions>
