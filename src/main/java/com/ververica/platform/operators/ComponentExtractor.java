@@ -77,7 +77,7 @@ public class ComponentExtractor extends RichFlatMapFunction<Commit, ComponentCha
   public void notifyCheckpointComplete(long l) throws Exception {
     numCompletedCheckpoints++;
 
-    if (hasRestored || (featureFlag && numCompletedCheckpoints > 1)) {
+    if (featureFlag && (hasRestored || numCompletedCheckpoints > 1)) {
       throw new RuntimeException("Something has gone terribly wrong");
     }
   }
