@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ComponentExtractor extends RichFlatMapFunction<Commit, ComponentChanged>
-    implements CheckpointedFunction, CheckpointListener {
+    implements CheckpointListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(ComponentExtractor.class);
 
@@ -27,10 +27,6 @@ public class ComponentExtractor extends RichFlatMapFunction<Commit, ComponentCha
 
   private transient Counter componentNotFoundCounter;
 
-  private transient boolean hasRestored;
-
-  private transient int numCompletedCheckpoints;
-
   public ComponentExtractor(boolean featureFlag) {
     this.featureFlag = featureFlag;
   }
@@ -39,7 +35,6 @@ public class ComponentExtractor extends RichFlatMapFunction<Commit, ComponentCha
   public void open(final Configuration parameters) throws Exception {
     super.open(parameters);
     componentNotFoundCounter = getRuntimeContext().getMetricGroup().counter("component-not-found");
-    numCompletedCheckpoints = 0;
   }
 
   @Override
@@ -66,22 +61,8 @@ public class ComponentExtractor extends RichFlatMapFunction<Commit, ComponentCha
   }
 
   @Override
-  public void snapshotState(FunctionSnapshotContext functionSnapshotContext) {
-    if (featureFlag && hasRestored) {
-      throw new RuntimeException("Something has gone terribly wrong");
-    }
-  }
-
-  @Override
-  public void initializeState(FunctionInitializationContext functionInitializationContext) {
-    hasRestored = functionInitializationContext.isRestored();
-  }
-
-  @Override
   public void notifyCheckpointComplete(long l) throws Exception {
-    numCompletedCheckpoints++;
-
-    if (featureFlag && numCompletedCheckpoints > 1) {
+    if (featureFlag) {
       throw new RuntimeException("Something has gone terribly wrong");
     }
   }
