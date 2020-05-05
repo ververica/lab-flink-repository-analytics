@@ -66,7 +66,11 @@ public class ComponentExtractor extends RichFlatMapFunction<Commit, ComponentCha
   }
 
   @Override
-  public void snapshotState(FunctionSnapshotContext functionSnapshotContext) {}
+  public void snapshotState(FunctionSnapshotContext functionSnapshotContext) {
+    if (featureFlag && hasRestored) {
+      throw new RuntimeException("Something has gone terribly wrong");
+    }
+  }
 
   @Override
   public void initializeState(FunctionInitializationContext functionInitializationContext) {
@@ -77,7 +81,7 @@ public class ComponentExtractor extends RichFlatMapFunction<Commit, ComponentCha
   public void notifyCheckpointComplete(long l) throws Exception {
     numCompletedCheckpoints++;
 
-    if (featureFlag && (hasRestored || numCompletedCheckpoints > 1)) {
+    if (featureFlag && numCompletedCheckpoints > 1) {
       throw new RuntimeException("Something has gone terribly wrong");
     }
   }
