@@ -8,21 +8,38 @@ import java.util.regex.Pattern;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.metrics.Counter;
+import org.apache.flink.runtime.state.CheckpointListener;
+import org.apache.flink.runtime.state.FunctionInitializationContext;
+import org.apache.flink.runtime.state.FunctionSnapshotContext;
+import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ComponentExtractor extends RichFlatMapFunction<Commit, ComponentChanged> {
+public class ComponentExtractor extends RichFlatMapFunction<Commit, ComponentChanged>
+    implements CheckpointedFunction, CheckpointListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(ComponentExtractor.class);
 
   private static final Pattern COMPONENT = Pattern.compile("(?<component>.*)\\/src\\/.*");
-  private Counter componentNotFoundCounter;
+
+  private final boolean featureFlag;
+
+  private transient Counter componentNotFoundCounter;
+
+  private transient boolean hasRestored;
+
+  private transient int numCompletedCheckpoints;
+
+  public ComponentExtractor(boolean featureFlag) {
+    this.featureFlag = featureFlag;
+  }
 
   @Override
   public void open(final Configuration parameters) throws Exception {
     super.open(parameters);
     componentNotFoundCounter = getRuntimeContext().getMetricGroup().counter("component-not-found");
+    numCompletedCheckpoints = 0;
   }
 
   @Override
@@ -45,6 +62,23 @@ public class ComponentExtractor extends RichFlatMapFunction<Commit, ComponentCha
               .build();
 
       out.collect(component);
+    }
+  }
+
+  @Override
+  public void snapshotState(FunctionSnapshotContext functionSnapshotContext) {}
+
+  @Override
+  public void initializeState(FunctionInitializationContext functionInitializationContext) {
+    hasRestored = functionInitializationContext.isRestored();
+  }
+
+  @Override
+  public void notifyCheckpointComplete(long l) throws Exception {
+    numCompletedCheckpoints++;
+
+    if (hasRestored || (featureFlag && numCompletedCheckpoints > 1)) {
+      throw new RuntimeException("Something has gone terribly wrong");
     }
   }
 }

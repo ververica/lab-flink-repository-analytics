@@ -51,8 +51,11 @@ public class FlinkCommitProgram {
     // General
     long checkpointInterval = params.getLong("checkpointing-interval-ms", 10_000L);
 
+    boolean featureFlag = params.getBoolean("enable-new-feature", false);
+
     StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
+    env.getConfig().enableObjectReuse();
     env.enableCheckpointing(checkpointInterval);
     env.getCheckpointConfig()
         .enableExternalizedCheckpoints(
@@ -67,7 +70,7 @@ public class FlinkCommitProgram {
 
     DataStream<ComponentChangedSummary> componentCounts =
         commits
-            .flatMap(new ComponentExtractor())
+            .flatMap(new ComponentExtractor(featureFlag))
             .name("component-extractor")
             .keyBy(ComponentChanged::getName)
             .timeWindow(Time.hours(1))
