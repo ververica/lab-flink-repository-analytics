@@ -51,7 +51,7 @@ public class FlinkCommitProgram {
     // General
     long checkpointInterval = params.getLong("checkpointing-interval-ms", 10_000L);
 
-    boolean featureFlag = params.getBoolean("enable-new-feature", false);
+    boolean featureFlag = params.has("enable-new-feature");
 
     StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
