@@ -17,6 +17,7 @@ Parameter | Description | Default
 ----------| ------------|--------
 es-host | Elastic Search Host | elasticsearch-master-headless.vvp.svc
 es-port | Elastic Search Port | 9200
-start-date | The application will process the commit history of Apache Flink starting from this date. Example: "2019-01-01" | now 
+start-date | The application will process the commit history of Apache Flink starting from this date. Example: "2019-01-01" | now
+enable-new-feature | A feature flag for enabling a new Job feature | false 
 poll-interval-ms | Minimum pause between polling commits via  Github API in milliseconds| 1000
 checkpointing-interval-ms | Apache Flink checkpointing interval | 10_000
