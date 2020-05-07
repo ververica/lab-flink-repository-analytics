@@ -6,7 +6,6 @@ import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
-import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.RateLimitChecker;
@@ -17,9 +16,9 @@ import org.slf4j.LoggerFactory;
 public abstract class GithubSource<T> extends RichSourceFunction<T> {
   private static final Logger LOG = LoggerFactory.getLogger(GithubSource.class);
 
-  private final String repoName;
+  protected final String repoName;
   private OkHttpClient okHttpClient;
-  protected GHRepository repo;
+  protected GitHub gitHub;
 
   public GithubSource(String repoName) {
     this.repoName = repoName;
@@ -29,8 +28,7 @@ public abstract class GithubSource<T> extends RichSourceFunction<T> {
   public void open(Configuration configuration) throws IOException {
     okHttpClient = setupOkHttpClient();
     LOG.info("Setting up GitHub client.");
-    GitHub gitHub = createGitHub(okHttpClient);
-    repo = gitHub.getRepository(repoName);
+    gitHub = createGitHub(okHttpClient);
   }
 
   @Override

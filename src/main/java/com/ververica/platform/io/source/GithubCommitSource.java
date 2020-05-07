@@ -13,6 +13,7 @@ import java.util.stream.StreamSupport;
 import org.apache.flink.streaming.api.checkpoint.ListCheckpointed;
 import org.apache.flink.streaming.api.watermark.Watermark;
 import org.kohsuke.github.GHCommit;
+import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHUser;
 import org.kohsuke.github.PagedIterable;
 import org.slf4j.Logger;
@@ -27,6 +28,9 @@ public class GithubCommitSource extends GithubSource<Commit> implements ListChec
   private final long pollIntervalMillis;
 
   private Instant lastTime;
+
+  private GHRepository repo;
+
   private volatile boolean running = true;
 
   public GithubCommitSource(String repoName) {
@@ -35,12 +39,13 @@ public class GithubCommitSource extends GithubSource<Commit> implements ListChec
 
   public GithubCommitSource(String repoName, Instant startTime, long pollIntervalMillis) {
     super(repoName);
-    lastTime = startTime;
+    this.lastTime = startTime;
     this.pollIntervalMillis = pollIntervalMillis;
   }
 
   @Override
   public void run(SourceContext<Commit> ctx) throws IOException {
+    repo = gitHub.getRepository(repoName);
     while (running) {
       Instant until = getUntilFor(lastTime);
       LOG.debug("Fetching commits since {} until {}", lastTime, until);
