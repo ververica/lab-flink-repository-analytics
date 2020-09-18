@@ -5,12 +5,16 @@ import com.ververica.platform.entities.FileChanged;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.apache.flink.streaming.api.checkpoint.ListCheckpointed;
+import org.apache.flink.api.common.state.ListState;
+import org.apache.flink.api.common.state.ListStateDescriptor;
+import org.apache.flink.runtime.state.FunctionInitializationContext;
+import org.apache.flink.runtime.state.FunctionSnapshotContext;
+import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.watermark.Watermark;
 import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHRepository;
@@ -19,7 +23,7 @@ import org.kohsuke.github.PagedIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GithubCommitSource extends GithubSource<Commit> implements ListCheckpointed<Instant> {
+public class GithubCommitSource extends GithubSource<Commit> implements CheckpointedFunction {
 
   private static final Logger LOG = LoggerFactory.getLogger(GithubCommitSource.class);
 
@@ -29,9 +33,9 @@ public class GithubCommitSource extends GithubSource<Commit> implements ListChec
 
   private Instant lastTime;
 
-  private GHRepository repo;
-
   private volatile boolean running = true;
+
+  private transient ListState<Instant> state;
 
   public GithubCommitSource(String repoName) {
     this(repoName, Instant.now(), 1000);
@@ -45,7 +49,7 @@ public class GithubCommitSource extends GithubSource<Commit> implements ListChec
 
   @Override
   public void run(SourceContext<Commit> ctx) throws IOException {
-    repo = gitHub.getRepository(repoName);
+    GHRepository repo = gitHub.getRepository(repoName);
     while (running) {
       Instant until = getUntilFor(lastTime);
       LOG.debug("Fetching commits since {} until {}", lastTime, until);
@@ -102,16 +106,6 @@ public class GithubCommitSource extends GithubSource<Commit> implements ListChec
     running = false;
   }
 
-  @Override
-  public List<Instant> snapshotState(long checkpointId, long timestamp) {
-    return Collections.singletonList(lastTime);
-  }
-
-  @Override
-  public void restoreState(List<Instant> state) {
-    lastTime = state.get(0);
-  }
-
   public Instant getUntilFor(Instant since) {
     Instant maybeUntil = since.plus(1, ChronoUnit.HOURS);
 
@@ -119,6 +113,26 @@ public class GithubCommitSource extends GithubSource<Commit> implements ListChec
       return Instant.now();
     } else {
       return maybeUntil;
+    }
+  }
+
+  @Override
+  public void snapshotState(FunctionSnapshotContext ctx) throws Exception {
+    state.clear();
+    state.add(lastTime);
+  }
+
+  @Override
+  public void initializeState(FunctionInitializationContext ctx) throws Exception {
+    state =
+        ctx.getOperatorStateStore()
+            .getListState(new ListStateDescriptor<>("instant", Instant.class));
+
+    if (ctx.isRestored()) {
+      Iterator<Instant> data = state.get().iterator();
+      if (data.hasNext()) {
+        lastTime = data.next();
+      }
     }
   }
 }
