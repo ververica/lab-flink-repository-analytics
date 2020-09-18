@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.metrics.Gauge;
+import org.apache.flink.metrics.MetricGroup;
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
@@ -29,6 +31,10 @@ public abstract class GithubSource<T> extends RichSourceFunction<T> {
     okHttpClient = setupOkHttpClient();
     LOG.info("Setting up GitHub client.");
     gitHub = createGitHub(okHttpClient);
+
+    MetricGroup kafkaGroup = getRuntimeContext().getMetricGroup().addGroup("KafkaConsumer");
+    kafkaGroup.gauge("assigned-partitions", (Gauge<Double>) () -> 1.0);
+    kafkaGroup.gauge("records-lag-max", (Gauge<Double>) () -> 10.0);
   }
 
   @Override
