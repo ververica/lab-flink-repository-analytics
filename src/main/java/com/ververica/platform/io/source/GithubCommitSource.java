@@ -4,6 +4,8 @@ import com.ververica.platform.entities.Commit;
 import com.ververica.platform.entities.FileChanged;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Iterator;
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.runtime.state.FunctionInitializationContext;
 import org.apache.flink.runtime.state.FunctionSnapshotContext;
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
@@ -28,6 +31,8 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
   private static final Logger LOG = LoggerFactory.getLogger(GithubCommitSource.class);
 
   private static final int PAGE_SIZE = 100;
+
+  public static final ZoneId EVALUATION_ZONE = ZoneId.of("UTC");
 
   private final long pollIntervalMillis;
 
@@ -56,14 +61,14 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
       PagedIterable<GHCommit> commits =
           repo.queryCommits().since(Date.from(lastTime)).until(Date.from(until)).list();
 
-      List<Commit> changes =
+      List<Tuple2<Commit, Date>> changes =
           StreamSupport.stream(commits.withPageSize(PAGE_SIZE).spliterator(), false)
               .map(GithubCommitSource::fromGHCommit)
               .collect(Collectors.toList());
 
       synchronized (ctx.getCheckpointLock()) {
-        for (Commit commit : changes) {
-          ctx.collectWithTimestamp(commit, commit.getTimestamp().getTime());
+        for (Tuple2<Commit, Date> commit : changes) {
+          ctx.collectWithTimestamp(commit.f0, commit.f1.getTime());
         }
 
         lastTime = until;
@@ -81,24 +86,34 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
     }
   }
 
-  private static Commit fromGHCommit(GHCommit ghCommit) {
+  private static Tuple2<Commit, Date> fromGHCommit(GHCommit ghCommit) {
     try {
-      Date lastCommitDate = ghCommit.getCommitDate();
+      LocalDateTime lastCommitDate =
+          ghCommit.getCommitDate().toInstant().atZone(EVALUATION_ZONE).toLocalDateTime();
+      LocalDateTime lastCommitAuthorDate =
+          ghCommit.getAuthoredDate().toInstant().atZone(EVALUATION_ZONE).toLocalDateTime();
       GHUser author = ghCommit.getAuthor();
+      GHUser committer = ghCommit.getCommitter();
 
-      return Commit.builder()
-          .author(getUserName(author))
-          .filesChanged(
-              ghCommit.getFiles().stream()
-                  .map(
-                      file ->
-                          FileChanged.builder()
-                              .filename(file.getFileName())
-                              .linesChanged(file.getLinesChanged())
-                              .build())
-                  .collect(Collectors.toList()))
-          .timestamp(lastCommitDate)
-          .build();
+      return Tuple2.of(
+          Commit.builder()
+              .author(getUserName(author))
+              .committer(getUserName(committer))
+              .filesChanged(
+                  ghCommit.getFiles().stream()
+                      .map(
+                          file ->
+                              FileChanged.builder()
+                                  .filename(file.getFileName())
+                                  .linesChanged(file.getLinesChanged())
+                                  .linesAdded(file.getLinesAdded())
+                                  .linesRemoved(file.getLinesDeleted())
+                                  .build())
+                      .toArray(FileChanged[]::new))
+              .commitDate(lastCommitDate)
+              .authorDate(lastCommitAuthorDate)
+              .build(),
+          ghCommit.getCommitDate());
     } catch (IOException e) {
       throw new RuntimeException("Failed to pull commit from GH", e);
     }
