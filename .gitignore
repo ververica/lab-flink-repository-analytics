@@ -12,3 +12,4 @@ buildNumber.properties
 .idea/**
 flink-repository-analytics.iml
 .DS_Store
+.attach_pid*
