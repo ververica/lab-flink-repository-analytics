@@ -70,10 +70,13 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
         ctx.emitWatermark(new Watermark(lastTime.toEpochMilli()));
       }
 
-      try {
-        Thread.sleep(pollIntervalMillis);
-      } catch (InterruptedException e) {
-        running = false;
+      if (pollIntervalMillis > 0) {
+        try {
+          //noinspection BusyWait
+          Thread.sleep(pollIntervalMillis);
+        } catch (InterruptedException e) {
+          running = false;
+        }
       }
     }
   }
