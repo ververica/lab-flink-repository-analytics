@@ -12,4 +12,6 @@ import lombok.NoArgsConstructor;
 public class FileChanged {
   private String filename;
   private int linesChanged;
+  private int linesAdded;
+  private int linesRemoved;
 }
