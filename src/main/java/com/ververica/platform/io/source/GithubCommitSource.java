@@ -84,7 +84,7 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
       GHUser author = ghCommit.getAuthor();
 
       return Commit.builder()
-          .author(author != null ? author.getName() : "unknown")
+          .author(getUserName(author))
           .filesChanged(
               ghCommit.getFiles().stream()
                   .map(
@@ -98,6 +98,16 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
           .build();
     } catch (IOException e) {
       throw new RuntimeException("Failed to pull commit from GH", e);
+    }
+  }
+
+  private static String getUserName(GHUser user) throws IOException {
+    if (user == null) {
+      return "unknown";
+    } else if (user.getName() == null) {
+      return user.getLogin() == null ? "unknown" : user.getLogin();
+    } else {
+      return user.getName();
     }
   }
 
