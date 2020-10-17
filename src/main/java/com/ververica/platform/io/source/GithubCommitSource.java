@@ -58,7 +58,7 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
 
       List<Commit> changes =
           StreamSupport.stream(commits.withPageSize(PAGE_SIZE).spliterator(), false)
-              .map(this::fromGHCommit)
+              .map(GithubCommitSource::fromGHCommit)
               .collect(Collectors.toList());
 
       synchronized (ctx.getCheckpointLock()) {
@@ -78,7 +78,7 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
     }
   }
 
-  private Commit fromGHCommit(GHCommit ghCommit) {
+  private static Commit fromGHCommit(GHCommit ghCommit) {
     try {
       Date lastCommitDate = ghCommit.getCommitDate();
       GHUser author = ghCommit.getAuthor();
@@ -116,7 +116,7 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
     running = false;
   }
 
-  public Instant getUntilFor(Instant since) {
+  public static Instant getUntilFor(Instant since) {
     Instant maybeUntil = since.plus(1, ChronoUnit.HOURS);
 
     if (maybeUntil.compareTo(Instant.now()) > 0) {
