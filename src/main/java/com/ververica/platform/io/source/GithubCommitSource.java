@@ -120,7 +120,7 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
   }
 
   public static Instant getUntilFor(Instant since) {
-    Instant maybeUntil = since.plus(1, ChronoUnit.HOURS);
+    Instant maybeUntil = since.plus(1, ChronoUnit.DAYS);
 
     Instant now = Instant.now();
     if (maybeUntil.compareTo(now) > 0) {
