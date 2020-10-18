@@ -88,6 +88,24 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.james</groupId>
+      <artifactId>apache-mime4j-core</artifactId>
+      <version>0.8.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.james</groupId>
+      <artifactId>apache-mime4j-dom</artifactId>
+      <version>0.8.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.james</groupId>
+      <artifactId>apache-mime4j-mbox-iterator</artifactId>
+      <version>0.8.3</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-slf4j-impl</artifactId>
       <version>${log4j.version}</version>
