@@ -30,7 +30,11 @@ public abstract class GithubSource<T> extends RichSourceFunction<T> {
   }
 
   protected static LocalDateTime dateToLocalDateTime(Date date) {
-    return date.toInstant().atZone(EVALUATION_ZONE).toLocalDateTime();
+    if (date != null) {
+      return date.toInstant().atZone(EVALUATION_ZONE).toLocalDateTime();
+    } else {
+      return null;
+    }
   }
 
   protected static String getUserName(GHUser user) throws IOException {
