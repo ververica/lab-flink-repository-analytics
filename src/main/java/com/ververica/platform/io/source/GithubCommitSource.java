@@ -5,7 +5,6 @@ import com.ververica.platform.entities.FileChanged;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Iterator;
@@ -31,8 +30,6 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
   private static final Logger LOG = LoggerFactory.getLogger(GithubCommitSource.class);
 
   private static final int PAGE_SIZE = 100;
-
-  public static final ZoneId EVALUATION_ZONE = ZoneId.of("UTC");
 
   private final long pollIntervalMillis;
 
@@ -88,10 +85,8 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
 
   private static Tuple2<Commit, Date> fromGHCommit(GHCommit ghCommit) {
     try {
-      LocalDateTime lastCommitDate =
-          ghCommit.getCommitDate().toInstant().atZone(EVALUATION_ZONE).toLocalDateTime();
-      LocalDateTime lastCommitAuthorDate =
-          ghCommit.getAuthoredDate().toInstant().atZone(EVALUATION_ZONE).toLocalDateTime();
+      LocalDateTime lastCommitDate = dateToLocalDateTime(ghCommit.getCommitDate());
+      LocalDateTime lastCommitAuthorDate = dateToLocalDateTime(ghCommit.getAuthoredDate());
       GHUser author = ghCommit.getAuthor();
       GHUser committer = ghCommit.getCommitter();
 
@@ -116,16 +111,6 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
           ghCommit.getCommitDate());
     } catch (IOException e) {
       throw new RuntimeException("Failed to pull commit from GH", e);
-    }
-  }
-
-  private static String getUserName(GHUser user) throws IOException {
-    if (user == null) {
-      return "unknown";
-    } else if (user.getName() == null) {
-      return user.getLogin() == null ? "unknown" : user.getLogin();
-    } else {
-      return user.getName();
     }
   }
 

@@ -1,6 +1,6 @@
 package com.ververica.platform;
 
-import static com.ververica.platform.io.source.GithubCommitSource.EVALUATION_ZONE;
+import static com.ververica.platform.io.source.GithubSource.EVALUATION_ZONE;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
 
