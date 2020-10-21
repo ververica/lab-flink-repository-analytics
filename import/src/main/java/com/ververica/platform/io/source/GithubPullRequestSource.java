@@ -39,10 +39,6 @@ public class GithubPullRequestSource extends GithubSource<PullRequest>
 
   private transient ListState<Instant> state;
 
-  public GithubPullRequestSource(String repoName) {
-    this(repoName, Instant.now(), 1000);
-  }
-
   public GithubPullRequestSource(String repoName, Instant startTime, long pollIntervalMillis) {
     super(repoName);
     this.lastTime = startTime;
@@ -84,16 +80,17 @@ public class GithubPullRequestSource extends GithubSource<PullRequest>
           }
           if (prCount % PAGE_SIZE == 0) {
             LOG.debug("Fetched pull requests: {} (last PR: {})", prCount, myPr.getNumber());
-
-            if (pollIntervalMillis > 0) {
-              try {
-                //noinspection BusyWait
-                Thread.sleep(pollIntervalMillis);
-              } catch (InterruptedException e) {
-                running = false;
-              }
-            }
           }
+        }
+      }
+
+      // If end of PR list is reached, delay further polls for data
+      if (pollIntervalMillis > 0) {
+        try {
+          //noinspection BusyWait
+          Thread.sleep(pollIntervalMillis);
+        } catch (InterruptedException e) {
+          running = false;
         }
       }
     }
