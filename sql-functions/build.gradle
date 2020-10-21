@@ -1,0 +1,17 @@
+dependencies {
+    // --------------------------------------------------------------
+    // Compile-time dependencies that should NOT be part of the
+    // shadow jar and are provided in the lib folder of Flink
+    // --------------------------------------------------------------
+    implementation "org.apache.flink:flink-table-api-java-bridge_${scalaBinaryVersion}:${flinkVersion}"
+    implementation "org.apache.flink:flink-table-planner-blink_${scalaBinaryVersion}:${flinkVersion}"
+}
+
+publishing {
+    publications {
+        shadow(MavenPublication) { publication ->
+            project.shadow.component(publication)
+            artifactId = "${project.parent.name}-${project.name}"
+        }
+    }
+}
