@@ -1,0 +1,12 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    // --------------------------------------------------------------
+    // Compile-time dependencies that should NOT be part of the
+    // shadow jar and are provided in the lib folder of Flink
+    // --------------------------------------------------------------
+    api "org.apache.flink:flink-java:${flinkVersion}"
+    api "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}"
+}
