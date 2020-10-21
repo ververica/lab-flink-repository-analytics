@@ -89,11 +89,17 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
       LocalDateTime lastCommitAuthorDate = dateToLocalDateTime(ghCommit.getAuthoredDate());
       GHUser author = ghCommit.getAuthor();
       GHUser committer = ghCommit.getCommitter();
+      String authorEmail = author != null ? author.getEmail() : null;
+      String committerEmail = committer != null ? committer.getEmail() : null;
+      String shortInfo = ghCommit.getCommitShortInfo().getMessage();
+      String sha1 = ghCommit.getSHA1();
 
       return Tuple2.of(
           Commit.builder()
               .author(getUserName(author))
+              .authorEmail(authorEmail)
               .committer(getUserName(committer))
+              .committerEmail(committerEmail)
               .filesChanged(
                   ghCommit.getFiles().stream()
                       .map(
@@ -107,6 +113,8 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
                       .toArray(FileChanged[]::new))
               .commitDate(lastCommitDate)
               .authorDate(lastCommitAuthorDate)
+              .shortInfo(shortInfo)
+              .sha1(sha1)
               .build(),
           ghCommit.getCommitDate());
     } catch (IOException e) {

@@ -18,6 +18,7 @@ import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHPullRequestQueryBuilder;
 import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GHUser;
 import org.kohsuke.github.PagedIterable;
 import org.kohsuke.github.PagedIterator;
 import org.slf4j.Logger;
@@ -99,17 +100,24 @@ public class GithubPullRequestSource extends GithubSource<PullRequest>
   }
 
   private static PullRequest fromGHPullRequest(GHPullRequest ghPullRequest) throws IOException {
+    GHUser creator = ghPullRequest.getUser();
+    GHUser mergedBy = ghPullRequest.getMergedBy();
+    String creatorEmail = creator != null ? creator.getEmail() : null;
+    String mergedByEmail = mergedBy != null ? mergedBy.getEmail() : null;
+
     return PullRequest.builder()
         .number(ghPullRequest.getNumber())
         .state(ghPullRequest.getState().toString())
         .title(ghPullRequest.getTitle())
-        .creator(getUserName(ghPullRequest.getUser()))
+        .creator(getUserName(creator))
+        .creatorEmail(creatorEmail)
         .createdAt(dateToLocalDateTime(ghPullRequest.getCreatedAt()))
         .updatedAt(dateToLocalDateTime(ghPullRequest.getUpdatedAt()))
         .closedAt(dateToLocalDateTime(ghPullRequest.getClosedAt()))
         .mergedAt(dateToLocalDateTime(ghPullRequest.getMergedAt()))
         .isMerged(ghPullRequest.isMerged())
-        .mergedBy(getUserName(ghPullRequest.getMergedBy()))
+        .mergedBy(getUserName(mergedBy))
+        .mergedByEmail(mergedByEmail)
         .commentsCount(ghPullRequest.getCommentsCount())
         .reviewCommentCount(ghPullRequest.getReviewComments())
         .commitCount(ghPullRequest.getCommits())
