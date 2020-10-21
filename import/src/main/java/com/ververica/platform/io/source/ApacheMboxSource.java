@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.runtime.state.FunctionInitializationContext;
 import org.apache.flink.runtime.state.FunctionSnapshotContext;
@@ -39,7 +40,9 @@ import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.james.mime4j.dom.Message;
 import org.apache.james.mime4j.dom.MessageBuilder;
 import org.apache.james.mime4j.dom.address.Mailbox;
-import org.apache.james.mime4j.dom.address.MailboxList;
+import org.apache.james.mime4j.dom.field.FieldName;
+import org.apache.james.mime4j.dom.field.MailboxField;
+import org.apache.james.mime4j.dom.field.MailboxListField;
 import org.apache.james.mime4j.mboxiterator.CharBufferWrapper;
 import org.apache.james.mime4j.mboxiterator.MboxIterator;
 import org.apache.james.mime4j.message.DefaultMessageBuilder;
@@ -189,31 +192,41 @@ public class ApacheMboxSource extends RichSourceFunction<Email> implements Check
     }
   }
 
-  private static Email fromMessage(CharBufferWrapper message, Charset charset) {
-    try (InputStream in = message.asInputStream(charset)) {
+  private static Email fromMessage(CharBufferWrapper input, Charset charset) {
+    try (InputStream in = input.asInputStream(charset)) {
       MessageBuilder builder = new DefaultMessageBuilder();
-      Message email = builder.parseMessage(in);
+      Message message = builder.parseMessage(in);
 
-      LocalDateTime date = dateToLocalDateTime(email.getDate());
+      LocalDateTime date = dateToLocalDateTime(message.getDate());
 
-      String fromStr = getAuthor(email);
-      return Email.builder().date(date).from(fromStr).subject(email.getSubject()).build();
+      Tuple2<String, Mailbox> author = getAuthor(message);
+      return Email.builder()
+          .date(date)
+          .fromRaw(author.f0)
+          .fromEmail(author.f1.toString())
+          .subject(message.getSubject())
+          .build();
     } catch (Exception e) {
       throw new RuntimeException("Failed to parse email", e);
     }
   }
 
-  private static String getAuthor(Message email) {
-    MailboxList from = email.getFrom();
-    if (from != null) {
-      return from.get(0).toString();
+  private static Tuple2<String, Mailbox> getAuthor(Message message) {
+    MailboxListField fromField = (MailboxListField) message.getHeader().getField(FieldName.FROM);
+    if (fromField == null || fromField.getMailboxList().isEmpty()) {
+      MailboxField senderField = (MailboxField) message.getHeader().getField(FieldName.SENDER);
+      return getAuthor(senderField);
     } else {
-      Mailbox sender = email.getSender();
-      if (sender != null) {
-        return sender.toString();
-      } else {
-        return "unknown";
-      }
+      Mailbox from = fromField.getMailboxList().get(0);
+      return Tuple2.of(fromField.getBody(), from);
+    }
+  }
+
+  private static Tuple2<String, Mailbox> getAuthor(MailboxField sender) {
+    if (sender != null) {
+      return Tuple2.of(sender.getBody(), sender.getMailbox());
+    } else {
+      return Tuple2.of("unknown", null);
     }
   }
 

@@ -76,7 +76,8 @@ public class FlinkMailingListToKafka {
     tableEnv.executeSql(
         "CREATE TABLE `mail_flink_dev` (\n"
             + "`date` TIMESTAMP(3),\n"
-            + "`from` STRING,\n"
+            + "`fromEmail` STRING,\n"
+            + "`fromRaw` STRING,\n"
             + "`subject` STRING\n"
             + ") WITH (\n"
             + "'connector' = 'kafka',\n"
@@ -92,7 +93,8 @@ public class FlinkMailingListToKafka {
     tableEnv.executeSql(
         "CREATE TABLE `mail_flink_user` (\n"
             + "`date` TIMESTAMP(3),\n"
-            + "`from` STRING,\n"
+            + "`fromEmail` STRING,\n"
+            + "`fromRaw` STRING,\n"
             + "`subject` STRING\n"
             + ") WITH (\n"
             + "'connector' = 'kafka',\n"
@@ -108,7 +110,8 @@ public class FlinkMailingListToKafka {
     tableEnv.executeSql(
         "CREATE TABLE `mail_flink_user_zh` (\n"
             + "`date` TIMESTAMP(3),\n"
-            + "`from` STRING,\n"
+            + "`fromEmail` STRING,\n"
+            + "`fromRaw` STRING,\n"
             + "`subject` STRING\n"
             + ") WITH (\n"
             + "'connector' = 'kafka',\n"
