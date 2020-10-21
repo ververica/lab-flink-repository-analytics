@@ -1,16 +1,12 @@
 package com.ververica.platform;
 
+import static com.ververica.platform.FlinkMailingListToKafka.DATE_OR_DATETIME_FORMATTER;
 import static com.ververica.platform.io.source.GithubSource.EVALUATION_ZONE;
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
 
 import com.ververica.platform.entities.PullRequest;
 import com.ververica.platform.io.source.GithubPullRequestSource;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.temporal.ChronoField;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -20,18 +16,6 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 public class FlinkPullRequestsToKafka {
 
   public static final String APACHE_FLINK_REPOSITORY = "apache/flink";
-
-  private static final DateTimeFormatter DATE_OR_DATETIME_FORMATTER =
-      new DateTimeFormatterBuilder()
-          .parseCaseInsensitive()
-          .append(ISO_LOCAL_DATE)
-          .optionalStart()
-          .appendLiteral('T')
-          .append(ISO_LOCAL_TIME)
-          .appendLiteral('Z')
-          .optionalEnd()
-          .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
-          .toFormatter();
 
   public static void main(String[] args) {
     ParameterTool params = ParameterTool.fromArgs(args);

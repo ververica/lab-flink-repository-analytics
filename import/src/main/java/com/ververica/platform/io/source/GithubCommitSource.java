@@ -39,10 +39,6 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
 
   private transient ListState<Instant> state;
 
-  public GithubCommitSource(String repoName) {
-    this(repoName, Instant.now(), 1000);
-  }
-
   public GithubCommitSource(String repoName, Instant startTime, long pollIntervalMillis) {
     super(repoName);
     this.lastTime = startTime;
@@ -51,9 +47,12 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
 
   @Override
   public void run(SourceContext<Commit> ctx) throws IOException {
+    boolean delayNextPoll;
     GHRepository repo = gitHub.getRepository(repoName);
     while (running) {
-      Instant until = getUntilFor(lastTime);
+      Tuple2<Instant, Boolean> untilTuple = getUntilFor(lastTime);
+      Instant until = untilTuple.f0;
+      delayNextPoll = untilTuple.f1;
       LOG.debug("Fetching commits since {} until {}", lastTime, until);
       PagedIterable<GHCommit> commits =
           repo.queryCommits().since(Date.from(lastTime)).until(Date.from(until)).list();
@@ -72,7 +71,7 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
         ctx.emitWatermark(new Watermark(lastTime.toEpochMilli()));
       }
 
-      if (pollIntervalMillis > 0) {
+      if (delayNextPoll && pollIntervalMillis > 0) {
         try {
           //noinspection BusyWait
           Thread.sleep(pollIntervalMillis);
@@ -127,14 +126,14 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
     running = false;
   }
 
-  public static Instant getUntilFor(Instant since) {
+  public static Tuple2<Instant, /* delay next? */ Boolean> getUntilFor(Instant since) {
     Instant maybeUntil = since.plus(1, ChronoUnit.DAYS);
 
     Instant now = Instant.now();
     if (maybeUntil.compareTo(now) > 0) {
-      return now;
+      return Tuple2.of(now, true);
     } else {
-      return maybeUntil;
+      return Tuple2.of(maybeUntil, false);
     }
   }
 
