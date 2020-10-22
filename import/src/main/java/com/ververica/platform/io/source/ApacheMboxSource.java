@@ -128,8 +128,11 @@ public class ApacheMboxSource extends RichSourceFunction<Email> implements Check
         for (CharsetEncoder encoder : ENCODERS) {
           encoder.reset();
           try (MboxIterator mboxIterator =
-              MboxIterator.fromFile(mboxFile).charset(encoder.charset()).build()) {
-            LOG.info("Decoding with {}", encoder);
+              MboxIterator.fromFile(mboxFile)
+                  .maxMessageSize(20 * 1024 * 1024)
+                  .charset(encoder.charset())
+                  .build()) {
+            LOG.info("Decoding {} with {}", url, encoder);
 
             emails =
                 StreamSupport.stream(mboxIterator.spliterator(), false)
@@ -137,7 +140,7 @@ public class ApacheMboxSource extends RichSourceFunction<Email> implements Check
                     .filter(email -> email.getDate().isAfter(lastDate))
                     .collect(Collectors.toList());
 
-            LOG.info("Found {} messages", emails.size());
+            LOG.info("Found {} messages in {}", emails.size(), url);
             break;
           } catch (CharConversionException | IllegalArgumentException ex) {
             // Not the right encoder
