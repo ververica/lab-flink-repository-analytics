@@ -5,6 +5,7 @@ import static java.time.temporal.ChronoField.MONTH_OF_YEAR;
 import static java.time.temporal.ChronoField.YEAR;
 
 import com.ververica.platform.entities.Email;
+import java.io.ByteArrayOutputStream;
 import java.io.CharConversionException;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,8 +38,11 @@ import org.apache.flink.runtime.state.FunctionSnapshotContext;
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
 import org.apache.flink.streaming.api.watermark.Watermark;
+import org.apache.james.mime4j.dom.Entity;
 import org.apache.james.mime4j.dom.Message;
 import org.apache.james.mime4j.dom.MessageBuilder;
+import org.apache.james.mime4j.dom.Multipart;
+import org.apache.james.mime4j.dom.TextBody;
 import org.apache.james.mime4j.dom.address.Mailbox;
 import org.apache.james.mime4j.dom.field.FieldName;
 import org.apache.james.mime4j.dom.field.MailboxField;
@@ -205,16 +209,77 @@ public class ApacheMboxSource extends RichSourceFunction<Email> implements Check
 
       LocalDateTime date = dateToLocalDateTime(message.getDate());
 
+      Body body = new Body();
+      if (message.isMultipart()) {
+        parseBodyParts((Multipart) message.getBody(), body);
+      } else {
+        parsePlainOrHtmlBody(message, body);
+      }
+
       Tuple2<String, Mailbox> author = getAuthor(message);
       return Email.builder()
           .date(date)
           .fromRaw(author.f0)
           .fromEmail(author.f1.toString())
           .subject(message.getSubject())
+          .textBody(body.getTextBody())
+          .htmlBody(body.getHtmlBody())
           .build();
     } catch (Exception e) {
       throw new RuntimeException("Failed to parse email", e);
     }
+  }
+
+  private static class Body {
+    StringBuilder textBody = new StringBuilder();
+    StringBuilder htmlBody = new StringBuilder();
+
+    String getTextBody() {
+      return textBody.length() == 0 ? null : textBody.toString();
+    }
+
+    String getHtmlBody() {
+      return htmlBody.length() == 0 ? null : htmlBody.toString();
+    }
+  }
+
+  private static void parseBodyParts(Multipart multipart, Body body) throws IOException {
+    for (Entity part : multipart.getBodyParts()) {
+      if (part.getDispositionType() != null
+          && !part.getDispositionType().equals("")
+          && !part.getDispositionType().equals("inline")) {
+        // attachment, ignore
+        LOG.trace(
+            "Ignoring part: {}, {}, {}",
+            part.getDispositionType(),
+            part.getMimeType(),
+            part.getFilename());
+      } else {
+        parsePlainOrHtmlBody(part, body);
+      }
+
+      // If current part contains other, parse it again by recursion
+      if (part.isMultipart()) {
+        parseBodyParts((Multipart) part.getBody(), body);
+      }
+    }
+  }
+
+  private static void parsePlainOrHtmlBody(Entity entity, Body body) throws IOException {
+    if (entity.getMimeType().equals("text/plain")) {
+      String txt = parseTextPart(entity);
+      body.textBody.append(txt);
+    } else if (entity.getMimeType().equals("text/html")) {
+      String html = parseTextPart(entity);
+      body.htmlBody.append(html);
+    }
+  }
+
+  private static String parseTextPart(Entity part) throws IOException {
+    TextBody tb = (TextBody) part.getBody();
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    tb.writeTo(baos);
+    return baos.toString();
   }
 
   private static Tuple2<String, Mailbox> getAuthor(Message message) {

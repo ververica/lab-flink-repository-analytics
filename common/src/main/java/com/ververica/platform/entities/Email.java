@@ -23,6 +23,8 @@ public class Email {
   private String fromRaw;
   private String fromEmail;
   private String subject;
+  private String textBody;
+  private String htmlBody;
 
   public static class CommitTypeInfoFactory extends TypeInfoFactory<Email> {
     @Override
@@ -34,7 +36,9 @@ public class Email {
               put("date", Types.LOCAL_DATE_TIME);
               put("fromRaw", Types.STRING);
               put("fromEmail", Types.STRING);
+              put("htmlBody", Types.STRING);
               put("subject", Types.STRING);
+              put("textBody", Types.STRING);
             }
           };
       return Types.POJO(Email.class, fields);
