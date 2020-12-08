@@ -3,6 +3,7 @@ plugins {
 }
 
 rootProject.name = 'flink-repository-analytics'
+include 'commit-analytics'
 include 'common'
 include 'import'
 include 'source-github'
