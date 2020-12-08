@@ -2,9 +2,6 @@ package com.ververica.platform.io.source;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import org.apache.flink.configuration.Configuration;
@@ -18,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class GithubSource<T> extends RichSourceFunction<T> {
-  public static final ZoneId EVALUATION_ZONE = ZoneId.of("UTC");
+
   private static final Logger LOG = LoggerFactory.getLogger(GithubSource.class);
 
   protected final String repoName;
@@ -27,14 +24,6 @@ public abstract class GithubSource<T> extends RichSourceFunction<T> {
 
   public GithubSource(String repoName) {
     this.repoName = repoName;
-  }
-
-  protected static LocalDateTime dateToLocalDateTime(Date date) {
-    if (date != null) {
-      return date.toInstant().atZone(EVALUATION_ZONE).toLocalDateTime();
-    } else {
-      return null;
-    }
   }
 
   protected static String getUserName(GHUser user) throws IOException {

@@ -6,6 +6,7 @@ rootProject.name = 'flink-repository-analytics'
 include 'common'
 include 'import'
 include 'source-github'
+include 'source-mbox'
 include 'sql-functions'
 
 // CI=true, TRAVIS=true, CONTINUOUS_INTEGRATION=true set automatically during Travis execution

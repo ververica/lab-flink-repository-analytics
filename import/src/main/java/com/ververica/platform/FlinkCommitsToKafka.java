@@ -1,7 +1,7 @@
 package com.ververica.platform;
 
 import static com.ververica.platform.FlinkMailingListToKafka.DATE_OR_DATETIME_FORMATTER;
-import static com.ververica.platform.io.source.GithubSource.EVALUATION_ZONE;
+import static com.ververica.platform.Utils.EVALUATION_ZONE;
 
 import com.ververica.platform.entities.Commit;
 import com.ververica.platform.io.source.GithubCommitSource;
