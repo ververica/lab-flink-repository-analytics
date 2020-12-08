@@ -40,6 +40,8 @@ subprojects {
         javaVersion = '1.8'
         flinkVersion = '1.11.2'
         scalaBinaryVersion = '2.12'
+        githubApiVersion = '1.109'
+        okHttpVersion = '3.13.1'
         log4jVersion = '2.13.1'
     }
 

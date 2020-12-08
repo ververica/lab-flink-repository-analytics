@@ -11,12 +11,14 @@ dependencies {
     implementation "org.apache.flink:flink-table-api-java-bridge_${scalaBinaryVersion}:${flinkVersion}"
     implementation "org.apache.flink:flink-table-planner-blink_${scalaBinaryVersion}:${flinkVersion}"
 
+    implementation project(path: ':source-github')
+    flinkShadowJar project(path: ':source-github', transitive: false)
+    flinkShadowJar "org.kohsuke:github-api:${githubApiVersion}"
+    flinkShadowJar "com.squareup.okhttp3:okhttp-urlconnection:${okHttpVersion}"
+
     flinkShadowJar "org.apache.flink:flink-connector-elasticsearch7_${scalaBinaryVersion}:${flinkVersion}"
     flinkShadowJar "org.apache.flink:flink-connector-kafka_${scalaBinaryVersion}:${flinkVersion}"
     flinkShadowJar "org.apache.flink:flink-json:${flinkVersion}"
-
-    flinkShadowJar "org.kohsuke:github-api:1.109"
-    flinkShadowJar "com.squareup.okhttp3:okhttp-urlconnection:3.13.1"
     flinkShadowJar "org.apache.james:apache-mime4j-core:0.8.3"
     flinkShadowJar "org.apache.james:apache-mime4j-dom:0.8.3"
     flinkShadowJar "org.apache.james:apache-mime4j-mbox-iterator:0.8.3"
