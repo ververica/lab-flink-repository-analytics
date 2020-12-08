@@ -1,5 +1,6 @@
 package com.ververica.platform.io.source;
 
+import com.ververica.platform.Utils;
 import com.ververica.platform.entities.FileChanged;
 import com.ververica.platform.entities.PullRequest;
 import java.io.IOException;
@@ -108,10 +109,10 @@ public class GithubPullRequestSource extends GithubSource<PullRequest>
         .title(ghPullRequest.getTitle())
         .creator(getUserName(creator))
         .creatorEmail(creatorEmail)
-        .createdAt(dateToLocalDateTime(ghPullRequest.getCreatedAt()))
-        .updatedAt(dateToLocalDateTime(ghPullRequest.getUpdatedAt()))
-        .closedAt(dateToLocalDateTime(ghPullRequest.getClosedAt()))
-        .mergedAt(dateToLocalDateTime(ghPullRequest.getMergedAt()))
+        .createdAt(Utils.dateToLocalDateTime(ghPullRequest.getCreatedAt()))
+        .updatedAt(Utils.dateToLocalDateTime(ghPullRequest.getUpdatedAt()))
+        .closedAt(Utils.dateToLocalDateTime(ghPullRequest.getClosedAt()))
+        .mergedAt(Utils.dateToLocalDateTime(ghPullRequest.getMergedAt()))
         .isMerged(ghPullRequest.isMerged())
         .mergedBy(getUserName(mergedBy))
         .mergedByEmail(mergedByEmail)

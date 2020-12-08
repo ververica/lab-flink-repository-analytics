@@ -1,9 +1,9 @@
 package com.ververica.platform.io.source;
 
-import static com.ververica.platform.io.source.GithubSource.dateToLocalDateTime;
 import static java.time.temporal.ChronoField.MONTH_OF_YEAR;
 import static java.time.temporal.ChronoField.YEAR;
 
+import com.ververica.platform.Utils;
 import com.ververica.platform.entities.Email;
 import java.io.ByteArrayOutputStream;
 import java.io.CharConversionException;
@@ -167,8 +167,7 @@ public class ApacheMboxSource extends RichSourceFunction<Email> implements Check
       LocalDateTime maxDate = null;
       synchronized (ctx.getCheckpointLock()) {
         for (Email email : emails) {
-          long timestamp =
-              email.getDate().atZone(GithubSource.EVALUATION_ZONE).toInstant().toEpochMilli();
+          long timestamp = email.getDate().atZone(Utils.EVALUATION_ZONE).toInstant().toEpochMilli();
           ctx.collectWithTimestamp(email, timestamp);
           if (timestamp > maxTimestamp) {
             maxTimestamp = timestamp;
@@ -195,8 +194,7 @@ public class ApacheMboxSource extends RichSourceFunction<Email> implements Check
         }
 
         lastDate = nextDate;
-        long nextDateMillis =
-            nextDate.atZone(GithubSource.EVALUATION_ZONE).toInstant().toEpochMilli();
+        long nextDateMillis = nextDate.atZone(Utils.EVALUATION_ZONE).toInstant().toEpochMilli();
         ctx.emitWatermark(new Watermark(nextDateMillis - 1));
       }
     }
@@ -207,7 +205,7 @@ public class ApacheMboxSource extends RichSourceFunction<Email> implements Check
       MessageBuilder builder = new DefaultMessageBuilder();
       Message message = builder.parseMessage(in);
 
-      LocalDateTime date = dateToLocalDateTime(message.getDate());
+      LocalDateTime date = Utils.dateToLocalDateTime(message.getDate());
 
       Body body = new Body();
       if (message.isMultipart()) {

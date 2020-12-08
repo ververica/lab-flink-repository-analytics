@@ -1,5 +1,6 @@
 package com.ververica.platform.io.source;
 
+import com.ververica.platform.Utils;
 import com.ververica.platform.entities.Commit;
 import com.ververica.platform.entities.FileChanged;
 import java.io.IOException;
@@ -84,8 +85,8 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
 
   private static Tuple2<Commit, Date> fromGHCommit(GHCommit ghCommit) {
     try {
-      LocalDateTime lastCommitDate = dateToLocalDateTime(ghCommit.getCommitDate());
-      LocalDateTime lastCommitAuthorDate = dateToLocalDateTime(ghCommit.getAuthoredDate());
+      LocalDateTime lastCommitDate = Utils.dateToLocalDateTime(ghCommit.getCommitDate());
+      LocalDateTime lastCommitAuthorDate = Utils.dateToLocalDateTime(ghCommit.getAuthoredDate());
       GHUser author = ghCommit.getAuthor();
       GHUser committer = ghCommit.getCommitter();
       String authorEmail = author != null ? author.getEmail() : null;
