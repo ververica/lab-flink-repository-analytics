@@ -7,13 +7,13 @@ dependencies {
     // Compile-time dependencies that should NOT be part of the
     // shadow jar and are provided in the lib folder of Flink
     // --------------------------------------------------------------
-    implementation "org.apache.flink:flink-runtime-web_${scalaBinaryVersion}:${flinkVersion}"
+    implementation "${flinkGroup}:flink-runtime-web_${scalaBinaryVersion}:${flinkVersion}"
     implementation project(path: ':source-github')
     flinkShadowJar project(path: ':source-github', transitive: false)
     flinkShadowJar "org.kohsuke:github-api:${githubApiVersion}"
     flinkShadowJar "com.squareup.okhttp3:okhttp-urlconnection:${okHttpVersion}"
 
-    flinkShadowJar "org.apache.flink:flink-connector-elasticsearch7_${scalaBinaryVersion}:${flinkVersion}"
+    flinkShadowJar "${flinkGroup}:flink-connector-elasticsearch7_${scalaBinaryVersion}:${flinkVersion}"
 }
 
 publishing {
