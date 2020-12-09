@@ -38,7 +38,8 @@ subprojects {
 
     ext {
         javaVersion = '1.8'
-        flinkVersion = '1.11.2'
+        flinkGroup = 'com.ververica.flink'
+        flinkVersion = '1.11.2-stream3'
         scalaBinaryVersion = '2.12'
         githubApiVersion = '1.109'
         okHttpVersion = '3.13.1'
@@ -63,6 +64,12 @@ subprojects {
                 snapshotsOnly()
             }
         }
+        maven {
+            url 'https://maven.ververica.com/artifactory/vvp-flink-release/'
+            mavenContent {
+                releasesOnly()
+            }
+        }
     }
 
     // NOTE: We cannot use "compileOnly" or "shadow" configurations since then we could not run code
@@ -73,7 +80,7 @@ subprojects {
         flinkShadowJar // dependencies which go into the shadowJar
 
         // provided by Flink
-        flinkShadowJar.exclude group: 'org.apache.flink', module: 'force-shading'
+        flinkShadowJar.exclude group: "${flinkGroup}", module: 'force-shading'
         flinkShadowJar.exclude group: 'com.google.code.findbugs', module: 'jsr305'
         flinkShadowJar.exclude group: 'org.slf4j'
         flinkShadowJar.exclude group: 'log4j'

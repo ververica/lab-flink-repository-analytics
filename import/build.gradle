@@ -7,9 +7,9 @@ dependencies {
     // Compile-time dependencies that should NOT be part of the
     // shadow jar and are provided in the lib folder of Flink
     // --------------------------------------------------------------
-    implementation "org.apache.flink:flink-runtime-web_${scalaBinaryVersion}:${flinkVersion}"
-    implementation "org.apache.flink:flink-table-api-java-bridge_${scalaBinaryVersion}:${flinkVersion}"
-    implementation "org.apache.flink:flink-table-planner-blink_${scalaBinaryVersion}:${flinkVersion}"
+    implementation "${flinkGroup}:flink-runtime-web_${scalaBinaryVersion}:${flinkVersion}"
+    implementation "${flinkGroup}:flink-table-api-java-bridge_${scalaBinaryVersion}:${flinkVersion}"
+    implementation "${flinkGroup}:flink-table-planner-blink_${scalaBinaryVersion}:${flinkVersion}"
 
     implementation project(path: ':source-github')
     flinkShadowJar project(path: ':source-github', transitive: false)
@@ -22,9 +22,9 @@ dependencies {
     flinkShadowJar "org.apache.james:apache-mime4j-dom:${mime4jVersion}"
     flinkShadowJar "org.apache.james:apache-mime4j-mbox-iterator:${mime4jVersion}"
 
-    flinkShadowJar "org.apache.flink:flink-connector-elasticsearch7_${scalaBinaryVersion}:${flinkVersion}"
-    flinkShadowJar "org.apache.flink:flink-connector-kafka_${scalaBinaryVersion}:${flinkVersion}"
-    flinkShadowJar "org.apache.flink:flink-json:${flinkVersion}"
+    flinkShadowJar "${flinkGroup}:flink-connector-elasticsearch7_${scalaBinaryVersion}:${flinkVersion}"
+    flinkShadowJar "${flinkGroup}:flink-connector-kafka_${scalaBinaryVersion}:${flinkVersion}"
+    flinkShadowJar "${flinkGroup}:flink-json:${flinkVersion}"
 }
 
 publishing {
