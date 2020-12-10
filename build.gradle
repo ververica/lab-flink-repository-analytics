@@ -44,7 +44,7 @@ subprojects {
         githubApiVersion = '1.109'
         okHttpVersion = '3.13.1'
         mime4jVersion = '0.8.3'
-        log4jVersion = '2.13.1'
+        log4jVersion = '2.12.1'
     }
 
     sourceCompatibility = javaVersion
