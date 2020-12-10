@@ -3,14 +3,7 @@ plugins {
 }
 
 dependencies {
-    // --------------------------------------------------------------
-    // Compile-time dependencies that should NOT be part of the
-    // shadow jar and are provided in the lib folder of Flink
-    // --------------------------------------------------------------
-    api "${flinkGroup}:flink-java:${flinkVersion}"
-    api "${flinkGroup}:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}"
-
-    flinkShadowJar "org.apache.james:apache-mime4j-core:${mime4jVersion}"
-    flinkShadowJar "org.apache.james:apache-mime4j-dom:${mime4jVersion}"
-    flinkShadowJar "org.apache.james:apache-mime4j-mbox-iterator:${mime4jVersion}"
+    implementation "org.apache.james:apache-mime4j-core:${mime4jVersion}"
+    implementation "org.apache.james:apache-mime4j-dom:${mime4jVersion}"
+    implementation "org.apache.james:apache-mime4j-mbox-iterator:${mime4jVersion}"
 }

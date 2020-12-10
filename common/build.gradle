@@ -3,10 +3,4 @@ plugins {
 }
 
 dependencies {
-    // --------------------------------------------------------------
-    // Compile-time dependencies that should NOT be part of the
-    // shadow jar and are provided in the lib folder of Flink
-    // --------------------------------------------------------------
-    api "${flinkGroup}:flink-java:${flinkVersion}"
-    api "${flinkGroup}:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}"
 }

@@ -3,13 +3,6 @@ plugins {
 }
 
 dependencies {
-    // --------------------------------------------------------------
-    // Compile-time dependencies that should NOT be part of the
-    // shadow jar and are provided in the lib folder of Flink
-    // --------------------------------------------------------------
-    api "${flinkGroup}:flink-java:${flinkVersion}"
-    api "${flinkGroup}:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}"
-
-    flinkShadowJar "org.kohsuke:github-api:${githubApiVersion}"
-    flinkShadowJar "com.squareup.okhttp3:okhttp-urlconnection:${okHttpVersion}"
+    implementation "org.kohsuke:github-api:${githubApiVersion}"
+    implementation "com.squareup.okhttp3:okhttp-urlconnection:${okHttpVersion}"
 }
