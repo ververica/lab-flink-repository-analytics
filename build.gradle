@@ -32,7 +32,7 @@ subprojects {
 
     // artifact properties
     group = 'com.ververica.platform'
-    version = '1.0.0'
+    version = '2.0-SNAPSHOT'
     description = """Ververica Platform Lab - Flink Repository Analytics"""
     archivesBaseName = "${rootProject.name}-${project.name}"
 
