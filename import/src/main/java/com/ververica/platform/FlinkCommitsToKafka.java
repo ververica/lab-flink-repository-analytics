@@ -1,12 +1,10 @@
 package com.ververica.platform;
 
-import static com.ververica.platform.FlinkMailingListToKafka.DATE_OR_DATETIME_FORMATTER;
-import static com.ververica.platform.Utils.EVALUATION_ZONE;
+import static com.ververica.platform.Utils.localDateTimeToInstant;
 
 import com.ververica.platform.entities.Commit;
 import com.ververica.platform.io.source.GithubCommitSource;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -67,18 +65,7 @@ public class FlinkCommitsToKafka {
 
   private static GithubCommitSource getGithubCommitSource(
       final long delayBetweenQueries, final String startDateString) {
-    final GithubCommitSource githubCommitSource;
-    if (startDateString.isEmpty()) {
-      githubCommitSource =
-          new GithubCommitSource(APACHE_FLINK_REPOSITORY, Instant.now(), delayBetweenQueries);
-    } else {
-      Instant startDate =
-          LocalDateTime.parse(startDateString, DATE_OR_DATETIME_FORMATTER)
-              .atZone(EVALUATION_ZONE)
-              .toInstant();
-      githubCommitSource =
-          new GithubCommitSource(APACHE_FLINK_REPOSITORY, startDate, delayBetweenQueries);
-    }
-    return githubCommitSource;
+    Instant startDate = localDateTimeToInstant(Utils.parseFlexibleDate(startDateString));
+    return new GithubCommitSource(APACHE_FLINK_REPOSITORY, startDate, delayBetweenQueries);
   }
 }
