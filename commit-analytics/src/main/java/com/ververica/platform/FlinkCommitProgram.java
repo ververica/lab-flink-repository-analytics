@@ -1,6 +1,6 @@
 package com.ververica.platform;
 
-import static com.ververica.platform.Utils.EVALUATION_ZONE;
+import static com.ververica.platform.Utils.localDateTimeToInstant;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 import com.ververica.platform.entities.Commit;
@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -85,17 +84,8 @@ public class FlinkCommitProgram {
 
   private static GithubCommitSource getGithubCommitSource(
       final long delayBetweenQueries, final String startDateString) {
-    final GithubCommitSource githubCommitSource;
-    if (startDateString.isEmpty()) {
-      githubCommitSource =
-          new GithubCommitSource(APACHE_FLINK_REPOSITORY, Instant.now(), delayBetweenQueries);
-    } else {
-      Instant startDate =
-          LocalDate.parse(startDateString).atStartOfDay(EVALUATION_ZONE).toInstant();
-      githubCommitSource =
-          new GithubCommitSource(APACHE_FLINK_REPOSITORY, startDate, delayBetweenQueries);
-    }
-    return githubCommitSource;
+    Instant startDate = localDateTimeToInstant(Utils.parseFlexibleDate(startDateString));
+    return new GithubCommitSource(APACHE_FLINK_REPOSITORY, startDate, delayBetweenQueries);
   }
 
   private static ElasticsearchSink<ComponentChangedSummary> getElasticsearchSink(

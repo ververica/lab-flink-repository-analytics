@@ -1,12 +1,10 @@
 package com.ververica.platform;
 
-import static com.ververica.platform.FlinkMailingListToKafka.DATE_OR_DATETIME_FORMATTER;
-import static com.ververica.platform.Utils.EVALUATION_ZONE;
+import static com.ververica.platform.Utils.localDateTimeToInstant;
 
 import com.ververica.platform.entities.PullRequest;
 import com.ververica.platform.io.source.GithubPullRequestSource;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -76,18 +74,7 @@ public class FlinkPullRequestsToKafka {
 
   private static GithubPullRequestSource getGithubPullRequestSource(
       final long delayBetweenQueries, final String startDateString) {
-    final GithubPullRequestSource githubPullRequestSource;
-    if (startDateString.isEmpty()) {
-      githubPullRequestSource =
-          new GithubPullRequestSource(APACHE_FLINK_REPOSITORY, Instant.now(), delayBetweenQueries);
-    } else {
-      Instant startDate =
-          LocalDateTime.parse(startDateString, DATE_OR_DATETIME_FORMATTER)
-              .atZone(EVALUATION_ZONE)
-              .toInstant();
-      githubPullRequestSource =
-          new GithubPullRequestSource(APACHE_FLINK_REPOSITORY, startDate, delayBetweenQueries);
-    }
-    return githubPullRequestSource;
+    Instant startDate = localDateTimeToInstant(Utils.parseFlexibleDate(startDateString));
+    return new GithubPullRequestSource(APACHE_FLINK_REPOSITORY, startDate, delayBetweenQueries);
   }
 }
