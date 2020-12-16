@@ -31,6 +31,11 @@ import org.apache.http.HttpHost;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+/**
+ * Flink job that reads commits in the apache/flink Github repository (using the Github API),
+ * aggregates hourly statistics on how many lines have changed per component, and writes them to
+ * ElasticSearch.
+ */
 public class FlinkCommitProgram {
 
   public static final String APACHE_FLINK_REPOSITORY = "apache/flink";
