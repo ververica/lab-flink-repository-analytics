@@ -11,6 +11,10 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
+/**
+ * Flink job that reads pull requests issued to the apache/flink Github repository (using the Github
+ * API) and writes their metadata to Kafka.
+ */
 public class FlinkPullRequestsToKafka {
 
   public static final String APACHE_FLINK_REPOSITORY = "apache/flink";

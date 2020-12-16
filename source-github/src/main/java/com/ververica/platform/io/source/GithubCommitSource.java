@@ -26,6 +26,7 @@ import org.kohsuke.github.PagedIterable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Reads commits from a Github repository using the Github API and extracts metadata. */
 public class GithubCommitSource extends GithubSource<Commit> implements CheckpointedFunction {
 
   private static final Logger LOG = LoggerFactory.getLogger(GithubCommitSource.class);

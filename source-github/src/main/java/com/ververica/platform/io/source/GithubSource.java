@@ -14,6 +14,11 @@ import org.kohsuke.github.extras.okhttp3.OkHttpConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Base class for sources reading from the Github API
+ *
+ * @param <T> The type of the records produced by this source.
+ */
 public abstract class GithubSource<T> extends RichSourceFunction<T> {
 
   private static final Logger LOG = LoggerFactory.getLogger(GithubSource.class);

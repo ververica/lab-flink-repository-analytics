@@ -25,6 +25,7 @@ import org.kohsuke.github.PagedIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Reads pull requests issued to a Github repository using the Github API and extracts metadata. */
 public class GithubPullRequestSource extends GithubSource<PullRequest>
     implements CheckpointedFunction {
 

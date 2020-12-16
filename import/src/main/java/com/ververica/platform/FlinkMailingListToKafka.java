@@ -8,6 +8,10 @@ import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
+/**
+ * Flink job that downloads and processes mailing list archives from flink-dev, flink-user, and
+ * flink-user-zh and writes parsed email messages to Kafka.
+ */
 public class FlinkMailingListToKafka {
 
   public static void main(String[] args) {
