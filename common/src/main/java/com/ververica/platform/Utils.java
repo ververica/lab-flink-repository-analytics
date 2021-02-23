@@ -13,8 +13,12 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.SignStyle;
 import java.time.temporal.ChronoField;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 public class Utils {
+  public static Pattern SOURCE_FILENAME_COMPONENT_PATTERN =
+      Pattern.compile(
+          "^(?<component>.+?(?=/src/.*|pom.xml|README.md)|(?:flink-)?docs(?=/.*)|tools(?=/.*)|flink-python(?=/.*)|flink-end-to-end-tests/test-scripts(?=/.*)|flink-scala-shell(?=/start-script/.*)|flink-container(?=/.*)|flink-contrib/docker-flink(?=/.*)|flink-table/flink-sql-client(?=/.*)|flink-end-to-end-tests(?=/[^/]*\\.sh)).*?");
 
   public static final ZoneId EVALUATION_ZONE = ZoneId.of("UTC");
 

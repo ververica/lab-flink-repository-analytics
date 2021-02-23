@@ -18,7 +18,7 @@ public class GetJiraTicketFrom extends ScalarFunction {
       if (!matcher.matches()) {
         return null;
       } else {
-        return matcher.group(1);
+        return matcher.group("ticketauthor");
       }
     }
   }
