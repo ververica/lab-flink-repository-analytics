@@ -1,10 +1,11 @@
 package com.ververica.platform.operators;
 
+import static com.ververica.platform.Utils.SOURCE_FILENAME_COMPONENT_PATTERN;
+
 import com.ververica.platform.entities.Commit;
 import com.ververica.platform.entities.ComponentChanged;
 import com.ververica.platform.entities.FileChanged;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.metrics.Counter;
@@ -17,8 +18,6 @@ public class ComponentExtractor extends RichFlatMapFunction<Commit, ComponentCha
     implements CheckpointListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(ComponentExtractor.class);
-
-  private static final Pattern COMPONENT = Pattern.compile("(?<component>.*)\\/src\\/.*");
 
   private final boolean featureFlag;
 
@@ -37,7 +36,7 @@ public class ComponentExtractor extends RichFlatMapFunction<Commit, ComponentCha
   @Override
   public void flatMap(Commit value, Collector<ComponentChanged> out) throws Exception {
     for (FileChanged file : value.getFilesChanged()) {
-      Matcher matcher = COMPONENT.matcher(file.getFilename());
+      Matcher matcher = SOURCE_FILENAME_COMPONENT_PATTERN.matcher(file.getFilename());
 
       if (!matcher.matches()) {
         LOG.trace("No component found for file {}", file.getFilename());
