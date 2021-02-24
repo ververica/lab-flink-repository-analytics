@@ -136,6 +136,9 @@ subprojects {
         // all dependencies they need. (Luckily, this does not influence what
         // ends up in the final shadowJar.)
         main.runtimeClasspath += configurations.shadow
+
+        test.compileClasspath += configurations.shadow
+        test.runtimeClasspath += configurations.shadow
     }
 
     // add FLINK_TRAINING_LOCAL to the environment variables if run via gradle
