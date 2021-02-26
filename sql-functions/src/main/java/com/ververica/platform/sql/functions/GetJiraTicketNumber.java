@@ -1,5 +1,6 @@
 package com.ververica.platform.sql.functions;
 
+import com.ververica.platform.PatternUtils;
 import java.util.regex.Matcher;
 import org.apache.flink.table.functions.ScalarFunction;
 
