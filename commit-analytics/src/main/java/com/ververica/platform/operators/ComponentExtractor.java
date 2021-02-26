@@ -1,6 +1,6 @@
 package com.ververica.platform.operators;
 
-import static com.ververica.platform.Utils.SOURCE_FILENAME_COMPONENT_PATTERN;
+import static com.ververica.platform.PatternUtils.SOURCE_FILENAME_COMPONENT_PATTERN;
 
 import com.ververica.platform.entities.Commit;
 import com.ververica.platform.entities.ComponentChanged;
