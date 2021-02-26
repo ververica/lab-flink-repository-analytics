@@ -141,7 +141,7 @@ WITH (
 ##### Flink Mailing Lists
 
 ```sql
-CREATE TEMPORARY TABLE `flink_ml_dev` (
+CREATE TABLE `flink_ml_dev` (
   `date` TIMESTAMP(3),
   `fromEmail` STRING,
   `fromRaw` STRING,
@@ -161,7 +161,8 @@ WITH (
   'json.fail-on-missing-field' = 'false',
   'json.ignore-parse-errors' = 'true'
 );
-CREATE TEMPORARY TABLE `flink_ml_user` (
+
+CREATE TABLE `flink_ml_user` (
   `date` TIMESTAMP(3),
   `fromEmail` STRING,
   `fromRaw` STRING,
@@ -181,7 +182,8 @@ WITH (
   'json.fail-on-missing-field' = 'false',
   'json.ignore-parse-errors' = 'true'
 );
-CREATE TEMPORARY TABLE `flink_ml_user_zh` (
+
+CREATE TABLE `flink_ml_user_zh` (
   `date` TIMESTAMP(3),
   `fromEmail` STRING,
   `fromRaw` STRING,
