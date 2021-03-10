@@ -122,8 +122,7 @@ CREATE TABLE `flink_pulls` (
   `state` STRING,
   `title` STRING,
   `updatedAt` TIMESTAMP(3),
-  WATERMARK FOR `createdAt` AS `createdAt` - INTERVAL '7' DAY,
-  PRIMARY KEY (`number`) NOT ENFORCED
+  WATERMARK FOR `createdAt` AS `createdAt` - INTERVAL '7' DAY
 )
 COMMENT 'Pull requests opened for the master branch of github.com/apache/flink'
 WITH (
