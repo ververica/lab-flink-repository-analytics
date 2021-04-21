@@ -42,7 +42,7 @@ subprojects {
     ext {
         javaVersion = '1.8'
         flinkGroup = 'com.ververica.flink'
-        flinkVersion = '1.11.2-stream3'
+        flinkVersion = '1.12.2-stream1'
         scalaBinaryVersion = '2.12'
         githubApiVersion = '1.109'
         okHttpVersion = '3.13.1'
