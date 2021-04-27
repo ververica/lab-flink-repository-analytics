@@ -48,6 +48,7 @@ subprojects {
         okHttpVersion = '3.13.1'
         mime4jVersion = '0.8.3'
         log4jVersion = '2.12.1'
+        junitVersion = '4.12'
     }
 
     sourceCompatibility = javaVersion
