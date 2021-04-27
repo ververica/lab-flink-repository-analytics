@@ -7,6 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
+import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
+import org.apache.flink.runtime.state.StateBackend;
+import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
@@ -40,6 +43,7 @@ public class ArrayListAggFunctionITCase {
         StreamTableEnvironment.create(
             env, EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build());
     env.getConfig().setRestartStrategy(RestartStrategies.noRestart());
+    env.setStateBackend(new RocksDBStateBackend((StateBackend) new MemoryStateBackend()));
 
     tEnv.createTemporaryFunction("ArrayListAggFunction", implementation);
   }
