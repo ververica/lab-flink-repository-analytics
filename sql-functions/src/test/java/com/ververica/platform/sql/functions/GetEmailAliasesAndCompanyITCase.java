@@ -26,6 +26,7 @@ public class GetEmailAliasesAndCompanyITCase {
 
   @Before
   public void setUp() {
+    TestValuesTableFactory.clearAllData();
     env = StreamExecutionEnvironment.getExecutionEnvironment();
     env.setParallelism(4);
     tEnv =
