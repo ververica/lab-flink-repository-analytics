@@ -80,6 +80,8 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
         } catch (InterruptedException e) {
           running = false;
         }
+      } else if (delayNextPoll && pollIntervalMillis < 0) {
+        cancel();
       }
     }
   }
