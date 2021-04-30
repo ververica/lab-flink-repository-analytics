@@ -94,6 +94,8 @@ public class GithubPullRequestSource extends GithubSource<PullRequest>
         } catch (InterruptedException e) {
           running = false;
         }
+      } else if (pollIntervalMillis < 0) {
+        cancel();
       }
     }
   }

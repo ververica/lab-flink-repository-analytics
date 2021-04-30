@@ -186,6 +186,9 @@ public class ApacheMboxSource extends RichSourceFunction<Email> implements Check
           } else {
             nextDate = maxDate;
           }
+          if (pollIntervalMillis < 0) {
+            cancel();
+          }
         } else {
           // assume month is complete
           nextDate =
