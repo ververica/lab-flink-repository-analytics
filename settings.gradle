@@ -7,6 +7,7 @@ include 'commit-analytics'
 include 'common'
 include 'import'
 include 'source-github'
+include 'source-jgit'
 include 'source-mbox'
 include 'sql-functions'
 
