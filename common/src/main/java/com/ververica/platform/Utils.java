@@ -45,6 +45,10 @@ public class Utils {
     }
   }
 
+  public static LocalDateTime dateToLocalDateTime(long date) {
+    return Instant.ofEpochMilli(date).atZone(EVALUATION_ZONE).toLocalDateTime();
+  }
+
   public static LocalDateTime dateToLocalDateTime(Date date) {
     if (date != null) {
       return date.toInstant().atZone(EVALUATION_ZONE).toLocalDateTime();

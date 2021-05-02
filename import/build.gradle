@@ -8,6 +8,7 @@ dependencies {
     shadow "${flinkGroup}:flink-table-planner-blink_${scalaBinaryVersion}:${flinkVersion}"
 
     implementation project(path: ':source-github')
+    implementation project(path: ':source-jgit')
 
     implementation project(path: ':source-mbox')
 
