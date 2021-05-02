@@ -65,6 +65,7 @@ public class GetEmailAliasesAndCompany
             "outlook.de",
             "pobox.com",
             "posteo.de",
+            "users.noreply.github.com",
             "web.de",
             "yahoo.com",
             "yahoo.in",
