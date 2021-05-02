@@ -120,9 +120,14 @@ public class ApacheMboxSource extends RichSourceFunction<Email> implements Check
       try {
         InputStream in = new URL(url).openStream();
         Files.copy(in, mboxFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        if (mboxFile.length() == 0) {
+          emails = Collections.emptyList();
+          LOG.info("Found empty mbox file at {}", url);
+        }
       } catch (FileNotFoundException e) {
         if (SKIP_NON_EXISTING_MBOX) {
           emails = Collections.emptyList();
+          LOG.trace("Found non-existing mbox file at {}", url);
         } else {
           throw e;
         }
