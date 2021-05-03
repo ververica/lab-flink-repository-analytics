@@ -61,6 +61,9 @@ public class FlinkCommitsToKafka {
             + "'properties.bootstrap.servers' = '"
             + kafkaServer
             + "',\n"
+            + "'properties.max.request.size' = '"
+            + 5 * 1024 * 1024
+            + "',"
             + "'format' = 'json'\n"
             + ")");
 
