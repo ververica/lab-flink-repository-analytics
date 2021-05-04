@@ -1,21 +1,23 @@
 package com.ververica.platform.sql.functions;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertThat;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
 import org.apache.flink.runtime.state.StateBackend;
 import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
+import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.planner.factories.TestValuesTableFactory;
 import org.apache.flink.types.Row;
 import org.apache.flink.types.RowKind;
+import org.apache.flink.util.CloseableIterator;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,6 +46,9 @@ public class ListAggITCase112 {
   }
 
   private void createSource(Row... inputData) {
+    // can use this instead if there are only inserts and no need for row times, watermarks,...:
+    // tEnv.createTemporaryView("input", tEnv.fromValues((Object[]) inputData));
+
     final String createSource =
         String.format(
             "CREATE TABLE input ( \n"
@@ -58,72 +63,54 @@ public class ListAggITCase112 {
     tEnv.executeSql(createSource);
   }
 
-  private List<String> getResult() throws InterruptedException, ExecutionException {
-    tEnv.executeSql(
-        "CREATE TABLE sink (\n"
-            + "    age INT,\n"
-            + "    names String\n"
-            + ") WITH (\n"
-            + "  'connector' = 'values',\n"
-            + "  'sink-insert-only' = 'false',\n"
-            + "  'changelog-mode' = 'I,UA,UB,D'\n"
-            + ")");
+  private List<Row> getResult() throws Exception {
+    Table resultTable = tEnv.sqlQuery("SELECT age, LISTAGG(DISTINCT name) FROM input GROUP BY age");
 
-    tEnv.executeSql(
-            "INSERT INTO sink\n"
-                + "SELECT\n"
-                + "  age,\n"
-                + "  LISTAGG(DISTINCT name)\n"
-                + "FROM input\n"
-                + "GROUP BY age")
-        .await();
-
-    return TestValuesTableFactory.getRawResults("sink");
+    try (CloseableIterator<Row> rowCloseableIterator = resultTable.execute().collect()) {
+      List<Row> results = new ArrayList<>();
+      rowCloseableIterator.forEachRemaining(results::add);
+      return results;
+    }
   }
 
   @Test
-  public void testListAgg1() throws ExecutionException, InterruptedException {
+  public void testListAgg1() throws Exception {
     createSource(
         Row.ofKind(RowKind.INSERT, "john", 32),
         Row.ofKind(RowKind.INSERT, "john", 32),
         Row.ofKind(RowKind.UPDATE_BEFORE, "john", 32),
         Row.ofKind(RowKind.UPDATE_AFTER, "john", 33));
 
-    List<String> actual = getResult();
-
-    List<String> expected = Arrays.asList("+I(32,john)", "+I(33,john)");
-
-    actual.sort(Comparator.naturalOrder());
-    expected.sort(Comparator.naturalOrder());
-    assertEquals(expected, actual);
+    assertThat(
+        getResult(),
+        containsInAnyOrder(
+            Row.ofKind(RowKind.INSERT, 32, "john"), Row.ofKind(RowKind.INSERT, 33, "john")));
   }
 
   @Test
-  public void testListAgg2() throws ExecutionException, InterruptedException {
+  public void testListAgg2() throws Exception {
     createSource(
         Row.ofKind(RowKind.INSERT, "john", 32),
         Row.ofKind(RowKind.UPDATE_BEFORE, "john", 32),
         Row.ofKind(RowKind.UPDATE_AFTER, "john", 33));
 
-    List<String> actual = getResult();
-
-    List<String> expected = Arrays.asList("+I(32,john)", "-D(32,john)", "+I(33,john)");
-
-    actual.sort(Comparator.naturalOrder());
-    expected.sort(Comparator.naturalOrder());
-    assertEquals(expected, actual);
+    assertThat(
+        getResult(),
+        containsInAnyOrder(
+            Row.ofKind(RowKind.INSERT, 32, "john"),
+            Row.ofKind(RowKind.DELETE, 32, "john"),
+            Row.ofKind(RowKind.INSERT, 33, "john")));
   }
 
   @Test
   public void testListAgg3() throws Exception {
     createSource(Row.ofKind(RowKind.INSERT, "john", 32), Row.ofKind(RowKind.INSERT, "alice", 32));
 
-    List<String> actual = getResult();
-
-    List<String> expected = Arrays.asList("+I(32,john)", "-U(32,john)", "+U(32,john,alice)");
-
-    actual.sort(Comparator.naturalOrder());
-    expected.sort(Comparator.naturalOrder());
-    assertEquals(expected, actual);
+    assertThat(
+        getResult(),
+        containsInAnyOrder(
+            Row.ofKind(RowKind.INSERT, 32, "john"),
+            Row.ofKind(RowKind.UPDATE_BEFORE, 32, "john"),
+            Row.ofKind(RowKind.UPDATE_AFTER, 32, "john,alice")));
   }
 }
