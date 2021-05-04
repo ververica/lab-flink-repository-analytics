@@ -1,6 +1,5 @@
 package com.ververica.platform.sql.functions;
 
-import static org.apache.flink.table.planner.factories.TestValuesTableFactory.changelogRow;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -15,6 +14,7 @@ import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.planner.factories.TestValuesTableFactory;
 import org.apache.flink.types.Row;
+import org.apache.flink.types.RowKind;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -82,11 +82,13 @@ public class LargestStringArrayAggFunctionITCase {
   @Test
   public void aggregation1() throws ExecutionException, InterruptedException {
     createSource(
-        changelogRow("+I", "john", new String[] {"john@test.com"}),
-        changelogRow("+I", "john", new String[] {"john@test.com", "john@apache.org"}),
-        changelogRow("+I", "john", new String[] {"john@test2.com"}),
-        changelogRow(
-            "+I", "john", new String[] {"john@test.com", "john@apache.org", "john@mail.ru"}));
+        Row.ofKind(RowKind.INSERT, "john", new String[] {"john@test.com"}),
+        Row.ofKind(RowKind.INSERT, "john", new String[] {"john@test.com", "john@apache.org"}),
+        Row.ofKind(RowKind.INSERT, "john", new String[] {"john@test2.com"}),
+        Row.ofKind(
+            RowKind.INSERT,
+            "john",
+            new String[] {"john@test.com", "john@apache.org", "john@mail.ru"}));
 
     List<String> rawResult = executeSql();
 
@@ -103,14 +105,17 @@ public class LargestStringArrayAggFunctionITCase {
   @Test
   public void aggregation2() throws ExecutionException, InterruptedException {
     createSource(
-        changelogRow("+I", "john", new String[] {"john@test.com"}),
-        changelogRow("-U", "john", new String[] {"john@test.com"}),
-        changelogRow("+U", "john", new String[] {"john@test.com", "john@apache.org"}),
-        changelogRow("-U", "john", new String[] {"john@test.com", "john@apache.org"}),
-        changelogRow("+U", "john", new String[] {"john@test2.com"}),
-        changelogRow("-U", "john", new String[] {"john@test2.com"}),
-        changelogRow(
-            "+U", "john", new String[] {"john@test.com", "john@apache.org", "john@mail.ru"}));
+        Row.ofKind(RowKind.INSERT, "john", new String[] {"john@test.com"}),
+        Row.ofKind(RowKind.UPDATE_BEFORE, "john", new String[] {"john@test.com"}),
+        Row.ofKind(RowKind.UPDATE_AFTER, "john", new String[] {"john@test.com", "john@apache.org"}),
+        Row.ofKind(
+            RowKind.UPDATE_BEFORE, "john", new String[] {"john@test.com", "john@apache.org"}),
+        Row.ofKind(RowKind.UPDATE_AFTER, "john", new String[] {"john@test2.com"}),
+        Row.ofKind(RowKind.UPDATE_BEFORE, "john", new String[] {"john@test2.com"}),
+        Row.ofKind(
+            RowKind.UPDATE_AFTER,
+            "john",
+            new String[] {"john@test.com", "john@apache.org", "john@mail.ru"}));
 
     List<String> rawResult = executeSql();
 
