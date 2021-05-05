@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
@@ -13,17 +12,16 @@ import org.apache.flink.runtime.state.StateBackend;
 import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.planner.factories.TestValuesTableFactory;
 import org.apache.flink.types.Row;
 import org.apache.flink.types.RowKind;
-import org.apache.flink.util.CloseableIterator;
 import org.junit.Before;
 import org.junit.Test;
 
 /** Integration test for {@link GetEmailAliasesAndCompany}. */
-public class GetEmailAliasesAndCompanyITCase {
+public class GetEmailAliasesAndCompanyITCase extends AbstractTableTestBase {
 
   protected StreamExecutionEnvironment env;
   protected StreamTableEnvironment tEnv;
@@ -58,8 +56,8 @@ public class GetEmailAliasesAndCompanyITCase {
   }
 
   private List<Row> executeSql() throws Exception {
-    Table resultTable =
-        tEnv.sqlQuery(
+    TableResult resultTable =
+        tEnv.executeSql(
             "SELECT\n"
                 + "  name,\n"
                 + "  GetEmailAliasesAndCompany(email, rowtime).aliases,\n"
@@ -67,12 +65,7 @@ public class GetEmailAliasesAndCompanyITCase {
                 + "  GetEmailAliasesAndCompany(email, rowtime).companySince\n"
                 + "FROM input\n"
                 + "GROUP BY name");
-
-    try (CloseableIterator<Row> rowCloseableIterator = resultTable.execute().collect()) {
-      List<Row> results = new ArrayList<>();
-      rowCloseableIterator.forEachRemaining(results::add);
-      return results;
-    }
+    return getRowsFromTable(resultTable);
   }
 
   @Test

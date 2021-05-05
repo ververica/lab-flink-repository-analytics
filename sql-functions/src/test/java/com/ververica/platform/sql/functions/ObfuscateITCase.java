@@ -3,7 +3,6 @@ package com.ververica.platform.sql.functions;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
@@ -17,12 +16,11 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.planner.factories.TestValuesTableFactory;
 import org.apache.flink.types.Row;
 import org.apache.flink.types.RowKind;
-import org.apache.flink.util.CloseableIterator;
 import org.junit.Before;
 import org.junit.Test;
 
 /** Integration test for {@link Obfuscate}. */
-public class ObfuscateITCase {
+public class ObfuscateITCase extends AbstractTableTestBase {
 
   protected StreamExecutionEnvironment env;
   protected StreamTableEnvironment tEnv;
@@ -55,14 +53,9 @@ public class ObfuscateITCase {
     tEnv.executeSql(createSource);
   }
 
-  private ArrayList<Row> executeSql() throws Exception {
+  private List<Row> executeSql() throws Exception {
     TableResult resultTable = tEnv.executeSql("SELECT Obfuscate(field) FROM input");
-
-    ArrayList<Row> resultList = new ArrayList<>();
-    try (CloseableIterator<Row> it = resultTable.collect()) {
-      it.forEachRemaining(resultList::add);
-    }
-    return resultList;
+    return getRowsFromTable(resultTable);
   }
 
   @Test
