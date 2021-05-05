@@ -3,7 +3,6 @@ package com.ververica.platform.sql.functions;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
@@ -12,13 +11,12 @@ import org.apache.flink.runtime.state.StateBackend;
 import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.functions.UserDefinedFunction;
 import org.apache.flink.table.planner.factories.TestValuesTableFactory;
 import org.apache.flink.types.Row;
 import org.apache.flink.types.RowKind;
-import org.apache.flink.util.CloseableIterator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +24,7 @@ import org.junit.runners.Parameterized;
 
 /** Integration test for {@link ArrayListAggFunction} and {@link ArrayListAggFunction2}. */
 @RunWith(Parameterized.class)
-public class ArrayListAggFunctionITCase {
+public class ArrayListAggFunctionITCase extends AbstractTableTestBase {
 
   protected StreamExecutionEnvironment env;
   protected StreamTableEnvironment tEnv;
@@ -67,19 +65,14 @@ public class ArrayListAggFunctionITCase {
   }
 
   private List<Row> executeSql() throws Exception {
-    Table resultTable =
-        tEnv.sqlQuery(
+    TableResult resultTable =
+        tEnv.executeSql(
             "SELECT\n"
                 + "  age,\n"
                 + "  ArrayListAggFunction(DISTINCT name)\n"
                 + "FROM input\n"
                 + "GROUP BY age");
-
-    try (CloseableIterator<Row> rowCloseableIterator = resultTable.execute().collect()) {
-      List<Row> results = new ArrayList<>();
-      rowCloseableIterator.forEachRemaining(results::add);
-      return results;
-    }
+    return getRowsFromTable(resultTable);
   }
 
   @Test

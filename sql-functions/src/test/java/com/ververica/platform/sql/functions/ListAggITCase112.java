@@ -3,7 +3,6 @@ package com.ververica.platform.sql.functions;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
@@ -12,17 +11,16 @@ import org.apache.flink.runtime.state.StateBackend;
 import org.apache.flink.runtime.state.memory.MemoryStateBackend;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.planner.factories.TestValuesTableFactory;
 import org.apache.flink.types.Row;
 import org.apache.flink.types.RowKind;
-import org.apache.flink.util.CloseableIterator;
 import org.junit.Before;
 import org.junit.Test;
 
 /** Integration test for the built-in <tt>LISTAGG</tt> function. */
-public class ListAggITCase112 {
+public class ListAggITCase112 extends AbstractTableTestBase {
 
   protected StreamExecutionEnvironment env;
   protected StreamTableEnvironment tEnv;
@@ -64,13 +62,9 @@ public class ListAggITCase112 {
   }
 
   private List<Row> getResult() throws Exception {
-    Table resultTable = tEnv.sqlQuery("SELECT age, LISTAGG(DISTINCT name) FROM input GROUP BY age");
-
-    try (CloseableIterator<Row> rowCloseableIterator = resultTable.execute().collect()) {
-      List<Row> results = new ArrayList<>();
-      rowCloseableIterator.forEachRemaining(results::add);
-      return results;
-    }
+    TableResult resultTable =
+        tEnv.executeSql("SELECT age, LISTAGG(DISTINCT name) FROM input GROUP BY age");
+    return getRowsFromTable(resultTable);
   }
 
   @Test
