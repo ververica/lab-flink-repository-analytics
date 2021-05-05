@@ -2,12 +2,22 @@ package com.ververica.platform.sql.functions;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.table.api.TableResult;
+import org.apache.flink.test.util.MiniClusterWithClientResource;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.CloseableIterator;
+import org.junit.ClassRule;
 
 /** Base class for unit tests with common functionality. */
 public class AbstractTableTestBase {
+  @ClassRule
+  public static MiniClusterWithClientResource flinkCluster =
+      new MiniClusterWithClientResource(
+          new MiniClusterResourceConfiguration.Builder()
+              .setNumberSlotsPerTaskManager(4)
+              .setNumberTaskManagers(1)
+              .build());
 
   /**
    * Executes the statements described by the table and retrieves the results as a list of rows.
