@@ -61,7 +61,7 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
 
       List<Tuple2<Commit, Date>> changes =
           StreamSupport.stream(commits.withPageSize(PAGE_SIZE).spliterator(), false)
-              .map(GithubCommitSource::fromGHCommit)
+              .map(this::fromGHCommit)
               .collect(Collectors.toList());
 
       synchronized (ctx.getCheckpointLock()) {
@@ -86,12 +86,12 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
     }
   }
 
-  private static Tuple2<Commit, Date> fromGHCommit(GHCommit ghCommit) {
+  private Tuple2<Commit, Date> fromGHCommit(GHCommit ghCommit) {
     try {
       LocalDateTime lastCommitDate = Utils.dateToLocalDateTime(ghCommit.getCommitDate());
       LocalDateTime lastCommitAuthorDate = Utils.dateToLocalDateTime(ghCommit.getAuthoredDate());
-      GHUser author = ghCommit.getAuthor();
-      GHUser committer = ghCommit.getCommitter();
+      GHUser author = fillUserDetailsFromCache(ghCommit.getAuthor());
+      GHUser committer = fillUserDetailsFromCache(ghCommit.getCommitter());
       String authorEmail = author != null ? author.getEmail() : null;
       String committerEmail = committer != null ? committer.getEmail() : null;
       String shortInfo = ghCommit.getCommitShortInfo().getMessage();

@@ -2,6 +2,8 @@ package com.ververica.platform.io.source;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Map;
+import javax.annotation.Nullable;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import org.apache.flink.configuration.Configuration;
@@ -23,12 +25,52 @@ public abstract class GithubSource<T> extends RichSourceFunction<T> {
 
   private static final Logger LOG = LoggerFactory.getLogger(GithubSource.class);
 
+  private static final int DEFAULT_MAX_USERS_IN_CACHE = 10_000;
+
   protected final String repoName;
   private OkHttpClient okHttpClient;
   protected GitHub gitHub;
 
+  protected final Map<String, GHUser> githubUserCache;
+
   public GithubSource(String repoName) {
+    this(repoName, -1);
+  }
+
+  public GithubSource(String repoName, int maxUsersInCache) {
     this.repoName = repoName;
+    if (maxUsersInCache < 0) {
+      this.githubUserCache = new LRUCache<>(DEFAULT_MAX_USERS_IN_CACHE);
+    } else {
+      this.githubUserCache = new LRUCache<>(maxUsersInCache);
+    }
+  }
+
+  /**
+   * Fetches user details such as name and email from a separate endpoint (these details are not
+   * normally returned from the Github APIs by default). Uses an internal cache for the retrieved
+   * objects to reduce the load on the Github APIs.
+   *
+   * @param maybeShallowUserInfo user object that may contain shallow user info data only
+   * @return the user object with all details filled (or <tt>null</tt> if
+   *     <tt>maybeShallowUserInfo</tt> was <tt>null</tt>)
+   */
+  @Nullable
+  protected GHUser fillUserDetailsFromCache(@Nullable GHUser maybeShallowUserInfo)
+      throws IOException {
+    if (maybeShallowUserInfo == null) {
+      return null;
+    }
+
+    GHUser entry = githubUserCache.get(maybeShallowUserInfo.getLogin());
+    if (entry != null) {
+      return entry;
+    } else {
+      // issue a call that triggers fetching user details
+      maybeShallowUserInfo.getName();
+      githubUserCache.put(maybeShallowUserInfo.getLogin(), maybeShallowUserInfo);
+      return maybeShallowUserInfo;
+    }
   }
 
   protected static String getUserName(GHUser user) throws IOException {
