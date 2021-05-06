@@ -44,7 +44,7 @@ subprojects {
         flinkGroup = 'com.ververica.flink'
         flinkVersion = '1.12.2-stream1'
         scalaBinaryVersion = '2.12'
-        githubApiVersion = '1.109'
+        githubApiVersion = '1.128'
         okHttpVersion = '3.13.1'
         mime4jVersion = '0.8.3'
         log4jVersion = '2.12.1'
