@@ -84,7 +84,7 @@ public abstract class GithubSource<T> extends RichSourceFunction<T> {
   }
 
   @Override
-  public void open(Configuration configuration) throws IOException {
+  public void open(Configuration configuration) throws Exception {
     okHttpClient = setupOkHttpClient();
     LOG.info("Setting up GitHub client.");
     gitHub = createGitHub(okHttpClient);

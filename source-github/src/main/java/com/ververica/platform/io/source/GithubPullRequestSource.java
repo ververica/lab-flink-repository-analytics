@@ -1,21 +1,22 @@
 package com.ververica.platform.io.source;
 
 import com.ververica.platform.Utils;
-import com.ververica.platform.entities.FileChanged;
 import com.ververica.platform.entities.PullRequest;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.stream.StreamSupport;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.runtime.state.FunctionInitializationContext;
 import org.apache.flink.runtime.state.FunctionSnapshotContext;
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.watermark.Watermark;
 import org.kohsuke.github.GHDirection;
 import org.kohsuke.github.GHIssueState;
+import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHPullRequestQueryBuilder;
 import org.kohsuke.github.GHRepository;
@@ -41,6 +42,8 @@ public class GithubPullRequestSource extends GithubSource<PullRequest>
 
   private transient ListState<Instant> state;
 
+  private transient Field ghPRMergeCommitField;
+
   public GithubPullRequestSource(String repoName, Instant startTime, long pollIntervalMillis) {
     super(repoName);
     this.lastTime = startTime;
@@ -48,7 +51,7 @@ public class GithubPullRequestSource extends GithubSource<PullRequest>
   }
 
   @Override
-  public void run(SourceContext<PullRequest> ctx) throws IOException {
+  public void run(SourceContext<PullRequest> ctx) throws IOException, IllegalAccessException {
     GHRepository repo = gitHub.getRepository(repoName);
     while (running) {
       LOG.debug("Fetching pull requests since {}", lastTime);
@@ -104,43 +107,38 @@ public class GithubPullRequestSource extends GithubSource<PullRequest>
     }
   }
 
-  private PullRequest fromGHPullRequest(GHPullRequest ghPullRequest) throws IOException {
+  private PullRequest fromGHPullRequest(GHPullRequest ghPullRequest)
+      throws IOException, IllegalAccessException {
     GHUser creator = fillUserDetailsFromCache(ghPullRequest.getUser());
-    GHUser mergedBy = fillUserDetailsFromCache(ghPullRequest.getMergedBy());
     String creatorEmail = creator != null ? creator.getEmail() : null;
-    String mergedByEmail = mergedBy != null ? mergedBy.getEmail() : null;
 
     return PullRequest.builder()
         .number(ghPullRequest.getNumber())
         .state(ghPullRequest.getState().toString())
         .title(ghPullRequest.getTitle())
+        .description(ghPullRequest.getBody())
         .creator(getUserName(creator))
         .creatorEmail(creatorEmail)
+        .labels(ghPullRequest.getLabels().stream().map(GHLabel::getName).toArray(String[]::new))
         .createdAt(Utils.dateToLocalDateTime(ghPullRequest.getCreatedAt()))
         .updatedAt(Utils.dateToLocalDateTime(ghPullRequest.getUpdatedAt()))
         .closedAt(Utils.dateToLocalDateTime(ghPullRequest.getClosedAt()))
         .mergedAt(Utils.dateToLocalDateTime(ghPullRequest.getMergedAt()))
-        .isMerged(ghPullRequest.isMerged())
-        .mergedBy(getUserName(mergedBy))
-        .mergedByEmail(mergedByEmail)
+        .mergeCommit(
+            ghPullRequest.getMergedAt() == null
+                ? null
+                : (String) ghPRMergeCommitField.get(ghPullRequest))
         .commentsCount(ghPullRequest.getCommentsCount())
-        .reviewCommentCount(ghPullRequest.getReviewComments())
-        .commitCount(ghPullRequest.getCommits())
-        .linesAdded(ghPullRequest.getAdditions())
-        .linesRemoved(ghPullRequest.getDeletions())
-        .filesChanged(
-            StreamSupport.stream(
-                    ghPullRequest.listFiles().withPageSize(PAGE_SIZE).spliterator(), false)
-                .map(
-                    file ->
-                        FileChanged.builder()
-                            .filename(file.getFilename())
-                            .linesChanged(file.getChanges())
-                            .linesAdded(file.getAdditions())
-                            .linesRemoved(file.getDeletions())
-                            .build())
-                .toArray(FileChanged[]::new))
         .build();
+  }
+
+  @Override
+  public void open(Configuration configuration) throws Exception {
+    super.open(configuration);
+
+    // hack to apply https://github.com/hub4j/github-api/pull/1136
+    ghPRMergeCommitField = GHPullRequest.class.getDeclaredField("merge_commit_sha");
+    ghPRMergeCommitField.setAccessible(true);
   }
 
   @Override
