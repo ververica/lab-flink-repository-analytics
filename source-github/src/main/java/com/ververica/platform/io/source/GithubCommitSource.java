@@ -55,7 +55,11 @@ public class GithubCommitSource extends GithubSource<Commit> implements Checkpoi
       Tuple2<Instant, Boolean> untilTuple = getUntilFor(lastTime);
       Instant until = untilTuple.f0;
       delayNextPoll = untilTuple.f1;
-      LOG.debug("Fetching commits since {} until {}", lastTime, until);
+      LOG.debug(
+          "Fetching commits since {} until {}, rate limits: {}",
+          lastTime,
+          until,
+          gitHub.getRateLimit());
       PagedIterable<GHCommit> commits =
           repo.queryCommits().since(Date.from(lastTime)).until(Date.from(until)).list();
 
