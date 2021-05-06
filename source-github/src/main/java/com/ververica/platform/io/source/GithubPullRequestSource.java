@@ -80,8 +80,12 @@ public class GithubPullRequestSource extends GithubSource<PullRequest>
               ctx.emitWatermark(new Watermark(createdAt.getTime()));
             }
           }
-          if (prCount % PAGE_SIZE == 0) {
-            LOG.debug("Fetched pull requests: {} (last PR: {})", prCount, myPr.getNumber());
+          if (prCount % PAGE_SIZE == 0 || !it.hasNext()) {
+            LOG.debug(
+                "Fetched pull requests: {} (last PR: {}), rate limits: {}",
+                prCount,
+                myPr.getNumber(),
+                gitHub.getRateLimit());
           }
         }
       }
