@@ -100,9 +100,9 @@ public class GithubPullRequestSource extends GithubSource<PullRequest>
     }
   }
 
-  private static PullRequest fromGHPullRequest(GHPullRequest ghPullRequest) throws IOException {
-    GHUser creator = ghPullRequest.getUser();
-    GHUser mergedBy = ghPullRequest.getMergedBy();
+  private PullRequest fromGHPullRequest(GHPullRequest ghPullRequest) throws IOException {
+    GHUser creator = fillUserDetailsFromCache(ghPullRequest.getUser());
+    GHUser mergedBy = fillUserDetailsFromCache(ghPullRequest.getMergedBy());
     String creatorEmail = creator != null ? creator.getEmail() : null;
     String mergedByEmail = mergedBy != null ? mergedBy.getEmail() : null;
 
