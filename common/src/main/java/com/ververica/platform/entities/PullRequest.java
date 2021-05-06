@@ -22,21 +22,16 @@ public class PullRequest {
   private int number;
   private String state;
   private String title;
+  private String description;
   private String creator;
   private String creatorEmail;
+  private String[] labels;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
   private LocalDateTime closedAt;
   private LocalDateTime mergedAt;
-  private boolean isMerged;
-  private String mergedBy;
-  private String mergedByEmail;
+  private String mergeCommit;
   private int commentsCount;
-  private int reviewCommentCount;
-  private int commitCount;
-  private FileChanged[] filesChanged;
-  private int linesAdded;
-  private int linesRemoved;
 
   public static class CommitTypeInfoFactory extends TypeInfoFactory<PullRequest> {
     @Override
@@ -48,21 +43,16 @@ public class PullRequest {
               put("number", Types.INT);
               put("state", Types.STRING);
               put("title", Types.STRING);
+              put("description", Types.STRING);
               put("creator", Types.STRING);
               put("creatorEmail", Types.STRING);
+              put("labels", Types.OBJECT_ARRAY(Types.STRING));
               put("createdAt", Types.LOCAL_DATE_TIME);
               put("updatedAt", Types.LOCAL_DATE_TIME);
               put("closedAt", Types.LOCAL_DATE_TIME);
+              put("mergeCommit", Types.STRING);
               put("mergedAt", Types.LOCAL_DATE_TIME);
-              put("isMerged", Types.BOOLEAN);
-              put("mergedBy", Types.STRING);
-              put("mergedByEmail", Types.STRING);
               put("commentsCount", Types.INT);
-              put("reviewCommentCount", Types.INT);
-              put("commitCount", Types.INT);
-              put("filesChanged", Types.OBJECT_ARRAY(Types.POJO(FileChanged.class)));
-              put("linesAdded", Types.INT);
-              put("linesRemoved", Types.INT);
             }
           };
       return Types.POJO(PullRequest.class, fields);
