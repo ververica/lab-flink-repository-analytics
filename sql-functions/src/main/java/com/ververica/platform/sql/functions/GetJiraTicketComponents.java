@@ -7,6 +7,8 @@ import org.apache.flink.table.functions.ScalarFunction;
 /**
  * Scalar SQL function to extract the Jira component of a ticket created/change email from text body
  * field sent by Jira.
+ *
+ * @see ExpandJiraTicketComponents for a Table function version of this
  */
 @SuppressWarnings("unused")
 public class GetJiraTicketComponents extends ScalarFunction {
