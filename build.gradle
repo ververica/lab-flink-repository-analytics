@@ -23,7 +23,7 @@ plugins {
 
 allprojects {
     group = 'com.ververica.platform'
-    version = '2.2-SNAPSHOT'
+    version = '2.1.50-summercamp21-1'
     description = """Ververica Platform Lab - Flink Repository Analytics"""
 }
 
