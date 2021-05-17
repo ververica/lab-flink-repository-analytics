@@ -1,5 +1,7 @@
 package com.ververica.platform;
 
+import static org.apache.flink.table.api.Expressions.$;
+
 import com.ververica.platform.io.source.ApacheMboxSource;
 import java.time.LocalDateTime;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -37,14 +39,26 @@ public class FlinkMailingListToKafka {
             env.addSource(
                     getApacheMailingListSource("flink-dev", delayBetweenQueries, startDateString))
                 .name("flink-dev-source")
-                .uid("flink-dev-source"));
+                .uid("flink-dev-source"),
+            $("date"),
+            $("fromEmail"),
+            $("fromRaw"),
+            $("htmlBody"),
+            $("subject"),
+            $("textBody"));
 
     Table emailsFlinkUser =
         tableEnv.fromDataStream(
             env.addSource(
                     getApacheMailingListSource("flink-user", delayBetweenQueries, startDateString))
                 .name("flink-user-source")
-                .uid("flink-user-source"));
+                .uid("flink-user-source"),
+            $("date"),
+            $("fromEmail"),
+            $("fromRaw"),
+            $("htmlBody"),
+            $("subject"),
+            $("textBody"));
 
     Table emailsFlinkUserZh =
         tableEnv.fromDataStream(
@@ -52,7 +66,13 @@ public class FlinkMailingListToKafka {
                     getApacheMailingListSource(
                         "flink-user-zh", delayBetweenQueries, startDateString))
                 .name("flink-user-zh-source")
-                .uid("flink-user-zh-source"));
+                .uid("flink-user-zh-source"),
+            $("date"),
+            $("fromEmail"),
+            $("fromRaw"),
+            $("htmlBody"),
+            $("subject"),
+            $("textBody"));
 
     tableEnv.executeSql(
         "CREATE TABLE `mail_flink_dev` (\n"
