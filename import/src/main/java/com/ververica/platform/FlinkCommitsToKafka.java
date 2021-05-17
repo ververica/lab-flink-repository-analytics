@@ -1,5 +1,7 @@
 package com.ververica.platform;
 
+import static org.apache.flink.table.api.Expressions.$;
+
 import com.ververica.platform.entities.Commit;
 import com.ververica.platform.io.source.JGitCommitSource;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -65,7 +67,19 @@ public class FlinkCommitsToKafka {
             + "'format' = 'json'\n"
             + ")");
 
-    tableEnv.fromDataStream(commits).executeInsert("commits");
+    tableEnv
+        .fromDataStream(
+            commits,
+            $("author"),
+            $("authorDate"),
+            $("authorEmail"),
+            $("commitDate"),
+            $("committer"),
+            $("committerEmail"),
+            $("filesChanged"),
+            $("sha1"),
+            $("shortInfo"))
+        .executeInsert("commits");
   }
 
   private static JGitCommitSource getGitCommitSource(
