@@ -62,16 +62,19 @@ public class ArrayListAggFunction4
               @Override
               public Optional<List<DataType>> inferInputTypes(
                   CallContext callContext, boolean throwOnFailure) {
-                // if you need to make sure the input is of a certain type:
+                DataType argType = callContext.getArgumentDataTypes().get(0);
+
                 /*
-                if (callContext.getArgumentDataTypes().get(0).getLogicalType().getTypeRoot()
-                        != LogicalTypeRoot.ARRAY
-                    && throwOnFailure) {
-                  throw callContext.newValidationError("Invalid input type");
+                // if you need to verify the input type or want to exclude a certain type:
+                if (argType.getLogicalType().getTypeRoot() == LogicalTypeRoot.ARRAY) {
+                  if (throwOnFailure) {
+                    throw callContext.newValidationError("Invalid input type");
+                  } else {
+                    return Optional.empty();
+                  }
                 }
                 */
 
-                DataType argType = callContext.getArgumentDataTypes().get(0);
                 return Optional.of(
                     Collections.singletonList(DataTypeUtils.toInternalDataType(argType)));
               }
