@@ -14,6 +14,7 @@ import org.apache.flink.table.types.inference.CallContext;
 import org.apache.flink.table.types.inference.ConstantArgumentCount;
 import org.apache.flink.table.types.inference.InputTypeStrategy;
 import org.apache.flink.table.types.inference.Signature;
+import org.apache.flink.table.types.inference.Signature.Argument;
 import org.apache.flink.table.types.inference.TypeInference;
 
 /** Aggregate function for putting data of type T into an array of elements T. */
@@ -63,7 +64,7 @@ public class ArrayListAggFunction3
 
               @Override
               public List<Signature> getExpectedSignatures(FunctionDefinition definition) {
-                return Collections.singletonList(Signature.of(Signature.Argument.of("value", "T")));
+                return Collections.singletonList(Signature.of(Argument.of("value", "T")));
               }
             })
         .accumulatorTypeStrategy(
