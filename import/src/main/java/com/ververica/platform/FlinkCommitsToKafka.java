@@ -31,8 +31,7 @@ public class FlinkCommitsToKafka {
     String ignoreCommitsBefore = params.get("ignore-commits-before", null);
 
     StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-    EnvironmentSettings settings =
-        EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
+    EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
     StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
 
     env.getConfig().enableObjectReuse();
