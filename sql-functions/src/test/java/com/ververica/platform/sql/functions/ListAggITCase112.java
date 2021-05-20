@@ -36,7 +36,7 @@ public class ListAggITCase112 extends AbstractTableTestBase {
     // create table environment
     tEnv =
         StreamTableEnvironment.create(
-            env, EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build());
+            env, EnvironmentSettings.newInstance().inStreamingMode().build());
     TestValuesTableFactory.clearAllData();
 
     // initialize and register any UDFs you need, e.g.

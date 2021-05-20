@@ -28,8 +28,7 @@ public class FlinkMailingListToKafka {
     String startDateString = params.get("start-date", "");
 
     StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-    EnvironmentSettings settings =
-        EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
+    EnvironmentSettings settings = EnvironmentSettings.newInstance().inStreamingMode().build();
     StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
 
     env.getConfig().enableObjectReuse();
