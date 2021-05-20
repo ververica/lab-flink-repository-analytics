@@ -33,7 +33,7 @@ public class GetEmailAliasesAndCompanyITCase extends AbstractTableTestBase {
     env.setParallelism(4);
     tEnv =
         StreamTableEnvironment.create(
-            env, EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build());
+            env, EnvironmentSettings.newInstance().inStreamingMode().build());
     env.getConfig().setRestartStrategy(RestartStrategies.noRestart());
     env.setStateBackend(new RocksDBStateBackend((StateBackend) new MemoryStateBackend()));
 
