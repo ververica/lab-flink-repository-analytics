@@ -235,7 +235,7 @@ public class JGitCommitSource extends RichSourceFunction<Commit> implements Chec
   @Override
   public void snapshotState(FunctionSnapshotContext ctx) throws Exception {
     state.clear();
-    state.add(lastCommitHash);
+    state.add(lastCommitHash == null ? "" : lastCommitHash);
   }
 
   @Override
@@ -248,6 +248,9 @@ public class JGitCommitSource extends RichSourceFunction<Commit> implements Chec
       Iterator<String> data = state.get().iterator();
       if (data.hasNext()) {
         lastCommitHash = data.next();
+        if (lastCommitHash.equals("")) {
+          lastCommitHash = null;
+        }
       }
     }
   }
