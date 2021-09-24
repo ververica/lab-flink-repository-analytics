@@ -22,6 +22,9 @@ public class FlinkMailingListToKafka {
     // Sink
     String kafkaServer = params.get("kafka-server", "kafka.vvp.svc");
     String kafkaTopic = params.get("kafka-topic", "flink-mail");
+    String kafkaSecurityProtocol = params.get("kafka-security-protocol", null);
+    String kafkaSaslMechanism = params.get("kafka-sasl-mechanism", null);
+    String kafkaSaslJaasConfig = params.get("kafka-sasl-jaas-config", null);
 
     // Source
     long delayBetweenQueries = params.getLong("poll-interval-ms", 10_000L);
@@ -89,6 +92,15 @@ public class FlinkMailingListToKafka {
             + "'properties.bootstrap.servers' = '"
             + kafkaServer
             + "',\n"
+            + (kafkaSecurityProtocol != null
+                ? "'properties.security.protocol' = '" + kafkaSecurityProtocol + "',\n"
+                : "")
+            + (kafkaSaslMechanism != null
+                ? "'properties.sasl.mechanism' = '" + kafkaSaslMechanism + "',\n"
+                : "")
+            + (kafkaSaslJaasConfig != null
+                ? "'properties.sasl.jaas.config' = '" + kafkaSaslJaasConfig + "',\n"
+                : "")
             + "'properties.max.request.size' = '"
             + 20 * 1024 * 1024
             + "',"
@@ -111,6 +123,15 @@ public class FlinkMailingListToKafka {
             + "'properties.bootstrap.servers' = '"
             + kafkaServer
             + "',\n"
+            + (kafkaSecurityProtocol != null
+                ? "'properties.security.protocol' = '" + kafkaSecurityProtocol + "',\n"
+                : "")
+            + (kafkaSaslMechanism != null
+                ? "'properties.sasl.mechanism' = '" + kafkaSaslMechanism + "',\n"
+                : "")
+            + (kafkaSaslJaasConfig != null
+                ? "'properties.sasl.jaas.config' = '" + kafkaSaslJaasConfig + "',\n"
+                : "")
             + "'properties.max.request.size' = '"
             + 20 * 1024 * 1024
             + "',"
@@ -133,6 +154,15 @@ public class FlinkMailingListToKafka {
             + "'properties.bootstrap.servers' = '"
             + kafkaServer
             + "',\n"
+            + (kafkaSecurityProtocol != null
+                ? "'properties.security.protocol' = '" + kafkaSecurityProtocol + "',\n"
+                : "")
+            + (kafkaSaslMechanism != null
+                ? "'properties.sasl.mechanism' = '" + kafkaSaslMechanism + "',\n"
+                : "")
+            + (kafkaSaslJaasConfig != null
+                ? "'properties.sasl.jaas.config' = '" + kafkaSaslJaasConfig + "',\n"
+                : "")
             + "'properties.max.request.size' = '"
             + 20 * 1024 * 1024
             + "',"
