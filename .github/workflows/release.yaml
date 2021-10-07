@@ -30,13 +30,14 @@ jobs:
           export RELEASE_VERSION=`./gradlew properties -q | grep "version:" | awk '{print $2}'`
           echo "::set-output name=release_version::${RELEASE_VERSION}"
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ steps.release_info.outputs.release_version }}
-          body:
+          name: Release ${{ steps.release_info.outputs.release_version }}
           draft: false
           prerelease: false
+          files: |
+            commit-analytics/build/libs/flink-repository-analytics-commit-analytics-${{ steps.release_info.outputs.release_version }}.jar
+            import/build/libs/flink-repository-analytics-import-${{ steps.release_info.outputs.release_version }}.jar
+            sql-functions/build/libs/flink-repository-analytics-sql-functions-${{ steps.release_info.outputs.release_version }}.jar
+          token: ${{ github.token }}
+          fail_on_unmatched_files: true
