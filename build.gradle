@@ -44,7 +44,7 @@ subprojects {
 //        flinkGroup = 'com.ververica.flink'
 //        flinkVersion = '1.12.2-stream1'
         flinkGroup = 'org.apache.flink'
-        flinkVersion = '1.13.0'
+        flinkVersion = '1.14.0'
         scalaBinaryVersion = '2.12'
         githubApiVersion = '1.128'
         okHttpVersion = '3.13.1'
