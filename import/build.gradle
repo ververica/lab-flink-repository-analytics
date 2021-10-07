@@ -5,7 +5,7 @@ mainClassName = 'com.ververica.platform.FlinkMailingListToKafka'
 dependencies {
     shadow "${flinkGroup}:flink-runtime-web_${scalaBinaryVersion}:${flinkVersion}"
     shadow "${flinkGroup}:flink-table-api-java-bridge_${scalaBinaryVersion}:${flinkVersion}"
-    shadow "${flinkGroup}:flink-table-planner-blink_${scalaBinaryVersion}:${flinkVersion}"
+    shadow "${flinkGroup}:flink-table-planner_${scalaBinaryVersion}:${flinkVersion}"
 
     implementation project(path: ':source-github')
     implementation project(path: ':source-jgit')
