@@ -23,6 +23,7 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.SignStyle;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -139,6 +140,7 @@ public class ApacheMboxSource extends RichSourceFunction<Email> implements Check
       }
 
       if (emails == null) {
+        List<Throwable> cause = new ArrayList<>();
         for (CharsetEncoder encoder : ENCODERS) {
           encoder.reset();
           try (MboxIterator mboxIterator =
@@ -159,13 +161,16 @@ public class ApacheMboxSource extends RichSourceFunction<Email> implements Check
             break;
           } catch (CharConversionException | IllegalArgumentException ex) {
             // Not the right encoder
+            cause.add(ex);
           } catch (IOException ex) {
             LOG.warn("Failed to open mbox file {} downloaded from {}", mboxFile.getName(), url, ex);
           }
         }
 
         if (emails == null) {
-          throw new IOException("No valid charset found");
+          IOException e = new IOException("No valid charset found");
+          cause.forEach(e::addSuppressed);
+          throw e;
         }
       }
 
