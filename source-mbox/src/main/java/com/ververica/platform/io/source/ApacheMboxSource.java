@@ -48,6 +48,7 @@ import org.apache.james.mime4j.dom.field.FieldName;
 import org.apache.james.mime4j.dom.field.MailboxField;
 import org.apache.james.mime4j.dom.field.MailboxListField;
 import org.apache.james.mime4j.mboxiterator.CharBufferWrapper;
+import org.apache.james.mime4j.mboxiterator.FromLinePatterns;
 import org.apache.james.mime4j.mboxiterator.MboxIterator;
 import org.apache.james.mime4j.message.DefaultMessageBuilder;
 import org.slf4j.Logger;
@@ -62,8 +63,9 @@ public class ApacheMboxSource extends RichSourceFunction<Email> implements Check
   private static final DateTimeFormatter MBOX_DATE_FORMATTER =
       new DateTimeFormatterBuilder()
           .parseCaseInsensitive()
-          .appendValue(YEAR, 4, 4, SignStyle.EXCEEDS_PAD)
-          .appendValue(MONTH_OF_YEAR, 2)
+          .appendValue(YEAR, 4, 4, SignStyle.NOT_NEGATIVE)
+          .appendLiteral('-')
+          .appendValue(MONTH_OF_YEAR, 1, 2, SignStyle.NOT_NEGATIVE)
           .parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
           .toFormatter();
 
@@ -80,6 +82,8 @@ public class ApacheMboxSource extends RichSourceFunction<Email> implements Check
 
   private final String listName;
 
+  private final String listDomain;
+
   private LocalDateTime lastDate;
 
   private volatile boolean running = true;
@@ -88,8 +92,10 @@ public class ApacheMboxSource extends RichSourceFunction<Email> implements Check
 
   private transient File mboxFile = null;
 
-  public ApacheMboxSource(String listName, LocalDateTime startDate, long pollIntervalMillis) {
+  public ApacheMboxSource(
+      String listName, String listDomain, LocalDateTime startDate, long pollIntervalMillis) {
     this.listName = listName;
+    this.listDomain = listDomain;
     this.lastDate = startDate;
     this.pollIntervalMillis = pollIntervalMillis;
   }
@@ -109,11 +115,10 @@ public class ApacheMboxSource extends RichSourceFunction<Email> implements Check
       }
 
       String url =
-          "http://mail-archives.apache.org/mod_mbox/"
+          "https://lists.apache.org/api/mbox.lua?list="
               + listName
-              + "/"
-              + MBOX_DATE_FORMATTER.format(lastDate)
-              + ".mbox";
+              + "&domain=flink.apache.org&d="
+              + MBOX_DATE_FORMATTER.format(lastDate);
       LOG.info("Fetching mails from {}", url);
 
       List<Email> emails = null;
@@ -139,6 +144,7 @@ public class ApacheMboxSource extends RichSourceFunction<Email> implements Check
           try (MboxIterator mboxIterator =
               MboxIterator.fromFile(mboxFile)
                   .maxMessageSize(20 * 1024 * 1024)
+                  .fromLine(FromLinePatterns.DEFAULT2)
                   .charset(encoder.charset())
                   .build()) {
             LOG.info("Decoding {} with {}", url, encoder);
