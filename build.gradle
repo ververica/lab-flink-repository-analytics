@@ -21,9 +21,23 @@ plugins {
     id "io.freefair.lombok" version "5.3.0" apply false
 }
 
+ext {
+    javaVersion = '1.8'
+//    flinkGroup = 'com.ververica.flink'
+//    flinkVersion = '1.12.2-stream1'
+    flinkGroup = 'org.apache.flink'
+    flinkVersion = '1.14.0'
+    scalaBinaryVersion = '2.12'
+    githubApiVersion = '1.128'
+    okHttpVersion = '3.13.1'
+    mime4jVersion = '0.8.3'
+    log4jVersion = '2.12.1'
+    junitVersion = '4.12'
+}
+
 allprojects {
     group = 'com.ververica.platform'
-    version = '2.2-SNAPSHOT'
+    version = "2.2_${flinkVersion}-SNAPSHOT"
     description = """Ververica Platform Lab - Flink Repository Analytics"""
 }
 
@@ -38,20 +52,6 @@ subprojects {
 
     // artifact properties
     archivesBaseName = "${rootProject.name}-${project.name}"
-
-    ext {
-        javaVersion = '1.8'
-//        flinkGroup = 'com.ververica.flink'
-//        flinkVersion = '1.12.2-stream1'
-        flinkGroup = 'org.apache.flink'
-        flinkVersion = '1.14.0'
-        scalaBinaryVersion = '2.12'
-        githubApiVersion = '1.128'
-        okHttpVersion = '3.13.1'
-        mime4jVersion = '0.8.3'
-        log4jVersion = '2.12.1'
-        junitVersion = '4.12'
-    }
 
     sourceCompatibility = javaVersion
     targetCompatibility = javaVersion
