@@ -26,13 +26,20 @@ ext {
 //    flinkGroup = 'com.ververica.flink'
 //    flinkVersion = '1.12.2-stream1'
     flinkGroup = 'org.apache.flink'
-    flinkVersion = '1.14.0'
+    flinkVersion = '1.14.2'
     scalaBinaryVersion = '2.12'
-    githubApiVersion = '1.128'
-    okHttpVersion = '3.13.1'
-    mime4jVersion = '0.8.3'
-    log4jVersion = '2.12.1'
-    junitVersion = '4.12'
+    githubApiVersion = '1.301'
+    okHttpVersion = '4.9.3'
+    /*
+    Mime4J versions 0.8.5+ are built with Java 11 and will fail with the
+    following error when run on Java 8:
+
+    java.lang.NoSuchMethodError: java.nio.CharBuffer.flip()Ljava/nio/CharBuffer;
+      at org.apache.james.mime4j.mboxiterator.MboxIterator.decodeNextCharBuffer(MboxIterator.java:111)
+     */
+    mime4jVersion = '0.8.4'
+    log4jVersion = '2.17.1'
+    junitVersion = '4.13.2'
 }
 
 allprojects {
