@@ -99,7 +99,7 @@ public class FlinkMailingListToKafka {
                 ? "'properties.sasl.jaas.config' = '" + kafkaSaslJaasConfig + "',\n"
                 : "")
             + "'properties.max.request.size' = '"
-            + 20 * 1024 * 1024
+            + 40 * 1024 * 1024
             + "',"
             + "'format' = 'json'\n"
             + ")");
@@ -130,7 +130,7 @@ public class FlinkMailingListToKafka {
                 ? "'properties.sasl.jaas.config' = '" + kafkaSaslJaasConfig + "',\n"
                 : "")
             + "'properties.max.request.size' = '"
-            + 20 * 1024 * 1024
+            + 40 * 1024 * 1024
             + "',"
             + "'format' = 'json'\n"
             + ")");
@@ -161,7 +161,7 @@ public class FlinkMailingListToKafka {
                 ? "'properties.sasl.jaas.config' = '" + kafkaSaslJaasConfig + "',\n"
                 : "")
             + "'properties.max.request.size' = '"
-            + 20 * 1024 * 1024
+            + 40 * 1024 * 1024
             + "',"
             + "'format' = 'json'\n"
             + ")");

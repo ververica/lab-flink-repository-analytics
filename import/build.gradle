@@ -3,8 +3,8 @@ apply plugin: 'application'
 mainClassName = 'com.ververica.platform.FlinkMailingListToKafka'
 
 dependencies {
-    shadow "${flinkGroup}:flink-runtime-web_${scalaBinaryVersion}:${flinkVersion}"
-    shadow "${flinkGroup}:flink-table-api-java-bridge_${scalaBinaryVersion}:${flinkVersion}"
+    shadow "${flinkGroup}:flink-runtime-web:${flinkVersion}"
+    shadow "${flinkGroup}:flink-table-api-java-bridge:${flinkVersion}"
     shadow "${flinkGroup}:flink-table-planner_${scalaBinaryVersion}:${flinkVersion}"
 
     implementation project(path: ':source-github')
@@ -12,8 +12,8 @@ dependencies {
 
     implementation project(path: ':source-mbox')
 
-    implementation "${flinkGroup}:flink-connector-elasticsearch7_${scalaBinaryVersion}:${flinkVersion}"
-    implementation "${flinkGroup}:flink-connector-kafka_${scalaBinaryVersion}:${flinkVersion}"
+    implementation "${flinkGroup}:flink-connector-elasticsearch7:${flinkVersion}"
+    implementation "${flinkGroup}:flink-connector-kafka:${flinkVersion}"
     implementation "${flinkGroup}:flink-json:${flinkVersion}"
 }
 

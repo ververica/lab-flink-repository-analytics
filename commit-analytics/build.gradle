@@ -3,12 +3,12 @@ apply plugin: 'application'
 mainClassName = 'com.ververica.platform.FlinkCommitProgram'
 
 dependencies {
-    shadow "${flinkGroup}:flink-runtime-web_${scalaBinaryVersion}:${flinkVersion}"
+    shadow "${flinkGroup}:flink-runtime-web:${flinkVersion}"
     implementation project(path: ':source-github')
     implementation "org.kohsuke:github-api:${githubApiVersion}"
     implementation "com.squareup.okhttp3:okhttp-urlconnection:${okHttpVersion}"
 
-    implementation "${flinkGroup}:flink-connector-elasticsearch7_${scalaBinaryVersion}:${flinkVersion}"
+    implementation "${flinkGroup}:flink-connector-elasticsearch7:${flinkVersion}"
 }
 
 publishing {

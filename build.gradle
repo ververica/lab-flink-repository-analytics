@@ -26,7 +26,7 @@ ext {
 //    flinkGroup = 'com.ververica.flink'
 //    flinkVersion = '1.12.2-stream1'
     flinkGroup = 'org.apache.flink'
-    flinkVersion = '1.14.2'
+    flinkVersion = '1.15.3'
     scalaBinaryVersion = '2.12'
     githubApiVersion = '1.301'
     okHttpVersion = '4.9.3'
@@ -91,9 +91,9 @@ subprojects {
         shadow "org.apache.logging.log4j:log4j-api:${log4jVersion}"
         shadow "org.apache.logging.log4j:log4j-core:${log4jVersion}"
 
-        shadow "${flinkGroup}:flink-clients_${scalaBinaryVersion}:${flinkVersion}"
+        shadow "${flinkGroup}:flink-clients:${flinkVersion}"
         shadow "${flinkGroup}:flink-java:${flinkVersion}"
-        shadow "${flinkGroup}:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}"
+        shadow "${flinkGroup}:flink-streaming-java:${flinkVersion}"
 
         if (project != project(":common")) {
             implementation project(path: ':common')

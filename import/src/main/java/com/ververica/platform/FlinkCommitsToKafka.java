@@ -73,7 +73,7 @@ public class FlinkCommitsToKafka {
                 ? "'properties.sasl.jaas.config' = '" + kafkaSaslJaasConfig + "',\n"
                 : "")
             + "'properties.max.request.size' = '"
-            + 5 * 1024 * 1024
+            + 20 * 1024 * 1024
             + "',"
             + "'format' = 'json'\n"
             + ")");
