@@ -8,7 +8,7 @@ dependencies {
     implementation "org.kohsuke:github-api:${githubApiVersion}"
     implementation "com.squareup.okhttp3:okhttp-urlconnection:${okHttpVersion}"
 
-    implementation "${flinkGroup}:flink-connector-elasticsearch7:${flinkVersion}"
+    implementation "${flinkGroup}:flink-connector-elasticsearch7:${elasticVersion}"
 }
 
 publishing {
