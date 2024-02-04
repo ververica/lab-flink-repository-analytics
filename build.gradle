@@ -26,12 +26,13 @@ ext {
 //    flinkGroup = 'com.ververica.flink'
 //    flinkVersion = '1.12.2-stream1'
     flinkGroup = 'org.apache.flink'
-    flinkVersion = '1.17.1'
+    flinkVersion = '1.18.1'
     scalaBinaryVersion = '2.12'
     githubApiVersion = '1.301'
     okHttpVersion = '4.9.3'
 
     elasticVersion = '3.0.1-1.17'
+    kafkaVersion = '3.0.2-1.18'
     /*
     Mime4J versions 0.8.5+ are built with Java 11 and will fail with the
     following error when run on Java 8:
@@ -46,7 +47,7 @@ ext {
 
 allprojects {
     group = 'com.ververica.platform'
-    version = "2.3.2_${flinkVersion}"
+    version = "2.4.0_${flinkVersion}"
     description = """Ververica Platform Lab - Flink Repository Analytics"""
 }
 

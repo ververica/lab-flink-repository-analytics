@@ -13,7 +13,7 @@ dependencies {
     implementation project(path: ':source-mbox')
 
     implementation "${flinkGroup}:flink-connector-elasticsearch7:${elasticVersion}"
-    implementation "${flinkGroup}:flink-connector-kafka:${flinkVersion}"
+    implementation "${flinkGroup}:flink-connector-kafka:${kafkaVersion}"
     implementation "${flinkGroup}:flink-json:${flinkVersion}"
 }
 
