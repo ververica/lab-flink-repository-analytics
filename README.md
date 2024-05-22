@@ -273,3 +273,12 @@ A couple of other sub-projects mainly serve as helper utilities providing common
 - [`common`](common) offers generic helper classes and all entities used throughout the whole project.
 - [`source-github`](source-github) contains implementations of sources interacting with the Github API.
 - [`source-mbox`](source-mbox) contains a source implementation that uses [Apache James Mime4J](https://james.apache.org/mime4j/) to parse mbox archives.
+
+## How to create a new release
+
+- Update the version info in [`build.gradle`](build.gradle)
+- Create a PR to master branch
+- Once the PR is merged, create a release tag (e.g., `release-2.5.2_1.19.0`, see [`release.yaml`](.github/workflows/release.yaml)) 
+and push the tag to the master branch to trigger the release creation. Note that here we disabled the workflow
+[`publish.yaml`](.github/workflows/publish.yaml). Otherwise, the action `gradlew publish` in both workflows conflict
+with each other.
