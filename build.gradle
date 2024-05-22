@@ -47,7 +47,7 @@ ext {
 
 allprojects {
     group = 'com.ververica.platform'
-    version = "2.5.0_${flinkVersion}"
+    version = "2.5.1_${flinkVersion}"
     description = """Ververica Platform Lab - Flink Repository Analytics"""
 }
 
